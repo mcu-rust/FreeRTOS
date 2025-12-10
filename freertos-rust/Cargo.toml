@@ -31,3 +31,4 @@ std = ["critical-section/std"]
 
 [dependencies]
 critical-section = "1"
+mutex-traits = "1"

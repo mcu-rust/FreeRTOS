@@ -8,7 +8,7 @@ use crate::utils::*;
 unsafe impl Send for Task {}
 
 /// Handle for a FreeRTOS task
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Task {
     task_handle: FreeRtosTaskHandle,
 }
@@ -115,6 +115,11 @@ impl Task {
     #[inline]
     pub fn raw_handle(&self) -> FreeRtosTaskHandle {
         self.task_handle
+    }
+
+    #[inline]
+    pub fn is_null(&self) -> bool {
+        self.task_handle.is_null()
     }
 
     pub fn suspend_all() {

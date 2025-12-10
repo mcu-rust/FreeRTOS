@@ -36,7 +36,10 @@ where
     }
 
     /// Try to obtain a lock and mutable access to our inner value
-    pub fn lock<D: DurationTicks>(&self, max_wait: D) -> Result<MutexGuard<'_, T, M>, FreeRtosError> {
+    pub fn lock<D: DurationTicks>(
+        &self,
+        max_wait: D,
+    ) -> Result<MutexGuard<'_, T, M>, FreeRtosError> {
         self.mutex.take(max_wait)?;
 
         Ok(MutexGuard {
@@ -231,5 +234,94 @@ impl Drop for MutexRecursive {
 impl fmt::Debug for MutexRecursive {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self.0)
+    }
+}
+
+use mutex_traits::{ConstInit, RawMutex};
+/// [`mutex-traits`] implementation
+pub struct FreeRtosRawMutex {
+    inner: UnsafeCell<FreeRtosSemaphoreHandle>,
+}
+
+impl FreeRtosRawMutex {
+    /// Create a new `FreeRtosRawMutex`.
+    pub const fn empty() -> Self {
+        Self {
+            inner: UnsafeCell::new(core::ptr::null()),
+        }
+    }
+
+    fn get_inner(&self) -> &FreeRtosSemaphoreHandle {
+        let inner = unsafe { &mut *self.inner.get() };
+        if (*inner).is_null() {
+            critical_section::with(|_| {
+                if (*inner).is_null() {
+                    let m = unsafe { freertos_rs_create_mutex() };
+                    if m.is_null() {
+                        panic!();
+                    }
+                    *inner = m;
+                }
+            });
+        }
+        inner
+    }
+
+    #[inline]
+    fn try_lock_block(&self, block: bool) -> bool {
+        let t = if block {
+            FreeRtosTimeUnitsShimmed::get_max_wait()
+        } else {
+            0
+        };
+        let res = unsafe { freertos_rs_take_semaphore(*self.get_inner(), t) };
+        res == 0
+    }
+}
+
+unsafe impl Send for FreeRtosRawMutex {}
+
+impl ConstInit for FreeRtosRawMutex {
+    const INIT: Self = Self::empty();
+}
+
+unsafe impl RawMutex for FreeRtosRawMutex {
+    type GuardMarker = *mut ();
+
+    #[inline]
+    fn lock(&self) {
+        if !self.try_lock() {
+            panic!("Deadlocked");
+        }
+    }
+
+    #[inline]
+    fn try_lock(&self) -> bool {
+        self.try_lock_block(true)
+    }
+
+    #[inline]
+    unsafe fn unlock(&self) {
+        unsafe {
+            freertos_rs_give_semaphore(*self.get_inner());
+        }
+    }
+
+    #[inline]
+    fn is_locked(&self) -> bool {
+        if self.try_lock_block(false) {
+            unsafe {
+                self.unlock();
+            }
+            false
+        } else {
+            true
+        }
+    }
+}
+
+impl Drop for FreeRtosRawMutex {
+    fn drop(&mut self) {
+        unsafe { freertos_rs_delete_semaphore(*self.get_inner()) }
     }
 }
