@@ -106,9 +106,11 @@ impl NotifyWaiter for TaskNotifier {
         let inner = unsafe { &mut *self.inner.get() };
         if inner.raw_handle() == core::ptr::null() {
             if let Ok(task) = Task::current() {
-                let cs = CriticalRegion::enter();
-                *inner = task;
-                drop(cs);
+                critical_section::with(|_| {
+                    if inner.raw_handle() == core::ptr::null() {
+                        *inner = task;
+                    }
+                });
                 if let Ok(val) =
                     inner.wait_for_notification(0, u32::MAX, Duration::ms(timeout.to_millis()))
                 {
