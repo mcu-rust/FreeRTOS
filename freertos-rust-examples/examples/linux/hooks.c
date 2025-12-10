@@ -130,3 +130,7 @@ the stack and so not exists after this function exits. */
 	configMINIMAL_STACK_SIZE is specified in words, not bytes. */
 	*pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
+
+long xPortIsInsideInterrupt() {
+	return pdFALSE;
+}

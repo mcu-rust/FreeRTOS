@@ -426,12 +426,24 @@ void* freertos_rs_timer_get_id(TimerHandle_t timer) {
 
 #endif
 
+BaseType_t freertos_rs_is_in_isr() {
+	return xPortIsInsideInterrupt();
+}
+
 void freertos_rs_enter_critical() {
 	taskENTER_CRITICAL();
 }
 
 void freertos_rs_exit_critical() {
 	taskEXIT_CRITICAL();
+}
+
+uint32_t freertos_rs_enter_critical_from_isr() {
+	return taskENTER_CRITICAL_FROM_ISR();
+}
+
+void freertos_rs_exit_critical_from_isr(uint32_t x) {
+	taskEXIT_CRITICAL_FROM_ISR(x);
 }
 
 EventGroupHandle_t freertos_rs_event_group_create() {

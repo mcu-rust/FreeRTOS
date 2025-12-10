@@ -26,3 +26,8 @@ hooks = []
 interrupt = []
 cpu_clock = []
 delete_task = []
+critical_section_impl = ["critical-section/restore-state-u32"]
+std = ["critical-section/std"]
+
+[dependencies]
+critical-section = "1"

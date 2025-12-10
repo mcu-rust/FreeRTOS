@@ -150,6 +150,8 @@ extern void vAssertCalled( const char * const pcFileName, unsigned long ulLine )
 
 #define portYIELD_FROM_ISR( x ) ( void ) x
 
+long xPortIsInsideInterrupt();
+
 #ifdef __cplusplus
 }
 #endif

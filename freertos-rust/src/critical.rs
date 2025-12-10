@@ -106,7 +106,7 @@ impl<T> SuspendScheduler<T> {
         }
     }
 
-    pub fn lock(&self) -> SuspendSchedulerGuard<'_,T> {
+    pub fn lock(&self) -> SuspendSchedulerGuard<'_, T> {
         unsafe {
             freertos_rs_vTaskSuspendAll();
         }
@@ -144,6 +144,35 @@ impl<'mutex, T: ?Sized> Drop for SuspendSchedulerGuard<'mutex, T> {
     fn drop(&mut self) {
         unsafe {
             freertos_rs_xTaskResumeAll();
+        }
+    }
+}
+
+#[cfg(feature = "critical_section_impl")]
+mod critical_section_impl {
+    use super::*;
+    use crate::is_in_isr;
+    use critical_section::{set_impl, Impl, RawRestoreState};
+
+    struct FreeRtosCriticalSection;
+    set_impl!(FreeRtosCriticalSection);
+
+    unsafe impl Impl for FreeRtosCriticalSection {
+        unsafe fn acquire() -> RawRestoreState {
+            if is_in_isr() {
+                freertos_rs_enter_critical_from_isr()
+            } else {
+                freertos_rs_enter_critical();
+                0
+            }
+        }
+
+        unsafe fn release(restore_state: RawRestoreState) {
+            if is_in_isr() {
+                freertos_rs_exit_critical_from_isr(restore_state);
+            } else {
+                freertos_rs_exit_critical()
+            }
         }
     }
 }

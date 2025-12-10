@@ -166,8 +166,11 @@ extern "C" {
     ) -> FreeRtosBaseType;
     pub fn freertos_rs_timer_get_id(timer: FreeRtosTimerHandle) -> FreeRtosVoidPtr;
 
+    pub fn freertos_rs_is_in_isr() -> FreeRtosBaseType;
     pub fn freertos_rs_enter_critical();
     pub fn freertos_rs_exit_critical();
+    pub fn freertos_rs_enter_critical_from_isr() -> u32;
+    pub fn freertos_rs_exit_critical_from_isr(x: u32);
 
     pub fn freertos_rs_event_group_create() -> FreeRtosEventGroupHandle;
     pub fn freertos_rs_event_group_delete(event_group: FreeRtosEventGroupHandle);
