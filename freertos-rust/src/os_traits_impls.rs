@@ -49,6 +49,7 @@ where
 }
 
 /// `NotifyBuilder` implementation for task notification
+#[derive(Clone)]
 pub struct TaskNotifier {
     inner: Arc<UnsafeCell<Task>>,
 }
@@ -57,11 +58,15 @@ unsafe impl Send for TaskNotifier {}
 unsafe impl Sync for TaskNotifier {}
 
 impl TaskNotifier {
-    pub fn new() -> (Self, Self) {
+    pub fn new() -> (Self, TaskNotifyWaiter) {
         let task = unsafe { Task::from_raw_handle(core::ptr::null()) };
         let inner = Arc::new(UnsafeCell::new(task));
         let inner2 = Arc::clone(&inner);
-        (Self { inner }, Self { inner: inner2 })
+        (Self { inner }, TaskNotifyWaiter { inner: inner2 })
+    }
+
+    fn get_inner(&self) -> &mut Task {
+        unsafe { &mut *self.inner.get() }
     }
 }
 
@@ -76,50 +81,63 @@ impl NotifyBuilder for TaskNotifier {
 
 impl Notifier for TaskNotifier {
     fn notify(&self) -> bool {
-        let inner = unsafe { &*self.inner.get() };
-        if inner.raw_handle() == core::ptr::null() {
-            false
-        } else {
-            inner.set_notification_value(1);
-            true
+        let inner = self.get_inner();
+        if inner.is_null() {
+            return false;
         }
+
+        inner.set_notification_value(1);
+        true
     }
 }
 
 impl NotifierIsr for TaskNotifier {
     /// Should be called at the end of interrupt
     fn notify_from_isr(&self) -> bool {
-        let inner = unsafe { &*self.inner.get() };
-        if inner.raw_handle() == core::ptr::null() {
-            false
-        } else {
-            let mut ctx = InterruptContext::new();
-            inner
-                .notify_from_isr(&mut ctx, TaskNotification::OverwriteValue(1))
-                .is_ok()
+        let inner = self.get_inner();
+        if inner.is_null() {
+            return false;
         }
+
+        let mut ctx = InterruptContext::new();
+        inner
+            .notify_from_isr(&mut ctx, TaskNotification::OverwriteValue(1))
+            .is_ok()
     }
 }
 
-impl NotifyWaiter for TaskNotifier {
+pub struct TaskNotifyWaiter {
+    inner: Arc<UnsafeCell<Task>>,
+}
+
+impl TaskNotifyWaiter {
+    fn get_inner(&self) -> &mut Task {
+        unsafe { &mut *self.inner.get() }
+    }
+}
+
+unsafe impl Send for TaskNotifyWaiter {}
+
+impl NotifyWaiter for TaskNotifyWaiter {
     fn wait(&self, timeout: MicrosDurationU32) -> bool {
-        let inner = unsafe { &mut *self.inner.get() };
-        if inner.raw_handle() == core::ptr::null() {
-            if let Ok(task) = Task::current() {
+        let inner = self.get_inner();
+
+        if let Ok(task) = Task::current() {
+            if *inner != task {
                 critical_section::with(|_| {
-                    if inner.raw_handle() == core::ptr::null() {
+                    if *inner != task {
                         *inner = task;
                     }
                 });
-                if let Ok(val) =
-                    inner.wait_for_notification(0, u32::MAX, Duration::ms(timeout.to_millis()))
-                {
-                    return val != 0;
-                }
             }
-        } else if let Ok(val) =
-            inner.wait_for_notification(0, u32::MAX, Duration::ms(timeout.to_millis()))
-        {
+        }
+
+        if inner.is_null() {
+            return false;
+        }
+
+        let dur = Duration::ms(timeout.to_millis());
+        if let Ok(val) = inner.wait_for_notification(0, u32::MAX, dur) {
             return val != 0;
         }
         false
@@ -127,15 +145,18 @@ impl NotifyWaiter for TaskNotifier {
 }
 
 /// `NotifyBuilder` implementation for [`Semaphore`]
+#[derive(Clone)]
 pub struct SemaphoreNotifier {
     inner: Arc<Semaphore>,
 }
 
+unsafe impl Send for SemaphoreNotifier {}
+
 impl SemaphoreNotifier {
-    pub fn new() -> (Self, Self) {
+    pub fn new() -> (Self, SemaphoreNotifyWaiter) {
         let inner = Arc::new(Semaphore::new_binary().unwrap());
         let inner2 = Arc::clone(&inner);
-        (Self { inner }, Self { inner: inner2 })
+        (Self { inner }, SemaphoreNotifyWaiter { inner: inner2 })
     }
 }
 
@@ -162,7 +183,13 @@ impl NotifierIsr for SemaphoreNotifier {
     }
 }
 
-impl NotifyWaiter for SemaphoreNotifier {
+pub struct SemaphoreNotifyWaiter {
+    inner: Arc<Semaphore>,
+}
+
+unsafe impl Send for SemaphoreNotifyWaiter {}
+
+impl NotifyWaiter for SemaphoreNotifyWaiter {
     fn wait(&self, timeout: MicrosDurationU32) -> bool {
         self.inner.take(Duration::ms(timeout.to_millis())).is_ok()
     }
