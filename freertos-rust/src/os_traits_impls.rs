@@ -1,6 +1,6 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
-use os_traits::{timeout::tick::*, *};
+use os_trait::{prelude::*, FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs};
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
 pub struct FreeRTOS<T, N> {
@@ -11,26 +11,22 @@ pub struct FreeRTOS<T, N> {
 unsafe impl<T, N> Send for FreeRTOS<T, N> {}
 unsafe impl<T, N> Sync for FreeRTOS<T, N> {}
 
-impl<T, N> FreeRTOS<T, N>
-where
-    T: TickInstant,
-    N: NotifyBuilder,
-{
-    pub fn new() -> Self {
-        Self {
-            _t: PhantomData,
-            _n: PhantomData,
-        }
-    }
-}
-
 impl<T, N> OsInterface for FreeRTOS<T, N>
 where
     T: TickInstant,
     N: NotifyBuilder,
 {
     type RawMutex = FakeRawMutex;
-    type NotifyBuilder = N;
+    type Notifier = N::Notifier;
+    type NotifyWaiter = N::Waiter;
+    type Timeout = TickTimeoutNs<T>;
+
+    fn os() -> Self {
+        Self {
+            _t: PhantomData,
+            _n: PhantomData,
+        }
+    }
 
     #[inline]
     fn yield_thread() {
@@ -38,14 +34,21 @@ where
     }
 
     #[inline]
-    fn timeout() -> impl TimeoutNs {
-        TickTimeoutNs::<T>::new()
-    }
-
-    #[inline]
     fn delay() -> impl DelayNs {
         FreeRtosTickDelayNs::<T>::new()
     }
+
+    #[inline]
+    fn notify() -> (Self::Notifier, Self::NotifyWaiter) {
+        N::build()
+    }
+}
+
+pub trait NotifyBuilder {
+    type Notifier: Notifier;
+    type Waiter: NotifyWaiter;
+
+    fn build() -> (Self::Notifier, Self::Waiter);
 }
 
 /// `NotifyBuilder` implementation for task notification
@@ -71,10 +74,10 @@ impl TaskNotifier {
 }
 
 impl NotifyBuilder for TaskNotifier {
-    fn build() -> (impl Notifier, impl NotifyWaiter) {
-        Self::new()
-    }
-    fn build_isr() -> (impl NotifierIsr, impl NotifyWaiter) {
+    type Notifier = TaskNotifier;
+    type Waiter = TaskNotifyWaiter;
+
+    fn build() -> (Self::Notifier, Self::Waiter) {
         Self::new()
     }
 }
@@ -86,23 +89,15 @@ impl Notifier for TaskNotifier {
             return false;
         }
 
-        inner.set_notification_value(1);
-        true
-    }
-}
-
-impl NotifierIsr for TaskNotifier {
-    /// Should be called at the end of interrupt
-    fn notify_from_isr(&self) -> bool {
-        let inner = self.get_inner();
-        if inner.is_null() {
-            return false;
+        if is_in_isr() {
+            let mut ctx = InterruptContext::new();
+            inner
+                .notify_from_isr(&mut ctx, TaskNotification::OverwriteValue(1))
+                .is_ok()
+        } else {
+            inner.set_notification_value(1);
+            true
         }
-
-        let mut ctx = InterruptContext::new();
-        inner
-            .notify_from_isr(&mut ctx, TaskNotification::OverwriteValue(1))
-            .is_ok()
     }
 }
 
@@ -161,25 +156,22 @@ impl SemaphoreNotifier {
 }
 
 impl NotifyBuilder for SemaphoreNotifier {
-    fn build() -> (impl Notifier, impl NotifyWaiter) {
-        Self::new()
-    }
-    fn build_isr() -> (impl NotifierIsr, impl NotifyWaiter) {
+    type Notifier = SemaphoreNotifier;
+    type Waiter = SemaphoreNotifyWaiter;
+
+    fn build() -> (Self::Notifier, Self::Waiter) {
         Self::new()
     }
 }
 
 impl Notifier for SemaphoreNotifier {
     fn notify(&self) -> bool {
-        self.inner.give()
-    }
-}
-
-impl NotifierIsr for SemaphoreNotifier {
-    /// Should be called at the end of interrupt
-    fn notify_from_isr(&self) -> bool {
-        let mut ctx = InterruptContext::new();
-        self.inner.give_from_isr(&mut ctx)
+        if is_in_isr() {
+            let mut ctx = InterruptContext::new();
+            self.inner.give_from_isr(&mut ctx)
+        } else {
+            self.inner.give()
+        }
     }
 }
 
@@ -215,16 +207,14 @@ where
 {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
-        let t = TickTimeoutNs::<T>::new();
-        let mut ts = t.start_ns(ns);
-        while !ts.timeout() {}
+        let mut t = TickTimeoutNs::<T>::start_ns(ns);
+        while !t.timeout() {}
     }
 
     #[inline]
     fn delay_us(&mut self, us: u32) {
-        let t = TickTimeoutNs::<T>::new();
-        let mut ts = t.start_us(us);
-        while !ts.timeout() {
+        let mut t = TickTimeoutNs::<T>::start_us(us);
+        while !t.timeout() {
             CurrentTask::yield_now();
         }
     }
