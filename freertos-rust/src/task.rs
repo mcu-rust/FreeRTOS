@@ -335,6 +335,10 @@ impl CurrentTask {
         }
     }
 
+    pub fn yield_now() {
+        unsafe { freertos_rs_task_yield()}
+    }
+
     /// Take the notification and either clear the notification value or decrement it by one.
     pub fn take_notification<D: DurationTicks>(clear: bool, wait_for: D) -> u32 {
         unsafe { freertos_rs_task_notify_take(if clear { 1 } else { 0 }, wait_for.to_ticks()) }

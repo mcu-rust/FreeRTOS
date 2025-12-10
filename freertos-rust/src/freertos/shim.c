@@ -286,7 +286,9 @@ TickType_t freertos_rs_max_wait() {
 	return portMAX_DELAY;
 }
 
-
+void freertos_rs_task_yield() {
+	taskYIELD();
+}
 char* freertos_rs_task_get_name(TaskHandle_t task) {
 	return pcTaskGetName(task);
 }

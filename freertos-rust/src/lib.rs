@@ -92,6 +92,7 @@ mod timers;
 #[cfg(any(feature = "time", feature = "sync"))]
 mod units;
 mod utils;
+mod os_traits_impls;
 
 #[cfg(feature = "sync")]
 pub mod patterns;
@@ -130,3 +131,4 @@ pub use crate::units::*;
 #[cfg(feature = "cpu_clock")]
 pub use crate::utils::cpu_clock_hz;
 pub use crate::utils::shim_sanity_check;
+pub use crate::os_traits_impls::*;
