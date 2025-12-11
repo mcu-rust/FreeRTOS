@@ -74,6 +74,12 @@ impl TaskBuilder {
         self
     }
 
+    /// Set the stack size, in bytes.
+    pub fn stack_size_bytes(&mut self, stack_size: u32) -> &mut Self {
+        self.task_stack_size = (stack_size / 4) as u16;
+        self
+    }
+
     /// Set the task's priority.
     pub fn priority(&mut self, priority: TaskPriority) -> &mut Self {
         self.task_priority = priority;
