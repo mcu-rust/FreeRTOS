@@ -21,12 +21,10 @@ where
     type NotifyWaiter = N::Waiter;
     type Timeout = TickTimeoutNs<T>;
 
-    fn os() -> Self {
-        Self {
-            _t: PhantomData,
-            _n: PhantomData,
-        }
-    }
+    const O: Self = Self {
+        _t: PhantomData,
+        _n: PhantomData,
+    };
 
     #[inline]
     fn yield_thread() {
