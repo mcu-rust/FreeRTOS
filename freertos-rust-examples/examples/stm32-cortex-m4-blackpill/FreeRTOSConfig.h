@@ -110,6 +110,7 @@ extern void vAssertCalled( const char * const pcFileName, unsigned long ulLine )
 #define configUSE_APPLICATION_TASK_TAG	0
 #define configUSE_TICKLESS_IDLE			0 //max tickless period with 16MHz sysclock = ~1sek
 #define configEXPECTED_IDLE_TIME_BEFORE_SLEEP  3 //min as ticks before geting in tickless sleep
+#define configUSE_COUNTING_SEMAPHORES          1
 
 //http://www.freertos.org/Configuring-a-real-time-RTOS-application-to-use-software-timers.html
 #define configUSE_TIMERS				1
