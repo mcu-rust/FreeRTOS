@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ master ]
+    branches: [ main, master ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -60,7 +60,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     - name: Build
-      run: cargo build --verbose --no-default-features --features=sync,time,hooks,interrupt --package freertos-rust # Don't build the whole workspace because the examples use nightly features which will fail the build
+      run: cargo build --verbose --package freertos-rust
 
   freertos-rust-examples:
     name: Build examples
@@ -115,4 +115,8 @@ jobs:
             ;;
         esac
     - name: Build example
+      if: matrix.example == 'win' || matrix.example == 'linux'
+      run: cargo build --verbose --example ${{ matrix.example }} --target ${{ matrix.target }} --features std
+    - name: Build example
+      if: matrix.example != 'win' && matrix.example != 'linux'
       run: cargo build --verbose --example ${{ matrix.example }} --target ${{ matrix.target }}
