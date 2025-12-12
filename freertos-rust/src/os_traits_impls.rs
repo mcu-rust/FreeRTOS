@@ -183,7 +183,11 @@ unsafe impl Send for SemaphoreNotifyWaiter {}
 
 impl NotifyWaiter for SemaphoreNotifyWaiter {
     fn wait(&self, timeout: MicrosDurationU32) -> bool {
-        self.inner.take(Duration::ms(timeout.to_millis())).is_ok()
+        let mut t = timeout.to_millis();
+        if t == 0 {
+            t = 1;
+        }
+        self.inner.take(Duration::ms(t)).is_ok()
     }
 }
 
