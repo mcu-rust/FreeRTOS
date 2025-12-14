@@ -23,7 +23,7 @@ jobs:
             ~/.cargo/git
             ~/.rustup
             target
-          key: ${{ runner.os }}-${{ runner.arch }}-stable
+          key: ${{ runner.os }}-${{ runner.arch }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
       - run: cargo fmt --all --check
