@@ -11,7 +11,7 @@ fn main() {
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default();
     let out_dir = env::var("OUT_DIR").unwrap();
 
-    let mut b = freertos_cargo_build::Builder::new();
+    let mut b = freertos_build::Builder::new();
 
     b.freertos("FreeRTOS-Kernel/");
 

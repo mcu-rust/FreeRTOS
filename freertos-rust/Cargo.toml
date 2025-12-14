@@ -1,35 +1,35 @@
 [package]
-name = "freertos-rust"
-version = "0.3.0"
-authors = ["Jalon Wong <jalonwong@gmail.com>"]
-edition = "2024"
-description = """
-Create to use FreeRTOS in rust projects.
-The freertos-cargo-build crate can be used to build and link FreeRTOS from source inside build.rs.
-"""
-keywords = ["FreeRTOS", "embedded", "demo", "library"]
-license = "MIT"
-readme = "README.md"
-repository = "https://github.com/lobaro/FreeRTOS-rust"
-links = "freertos"
+    authors = ["Jalon Wong <jalonwong@gmail.com>"]
+    description = """Create to use FreeRTOS in rust projects.
+The freertos-cargo-build crate can be used to build and link FreeRTOS from source inside build.rs."""
+    documentation = "https://docs.rs/freertos-rs"
+    edition = "2024"
+    keywords = ["FreeRTOS", "RTOS", "embedded", "MCU"]
+    license = "MIT"
+    links = "freertos"
+    name = "freertos-rs"
+    readme = "README.md"
+    repository = "https://github.com/mcu-rust/FreeRTOS"
+    version = "0.3.0"
+
 
 [lib]
-name = "freertos_rust"
-path = "src/lib.rs"
+    name = "freertos_rs"
+    path = "src/lib.rs"
 
 [features]
-default = ["allocator", "sync", "time", "hooks", "interrupt", "delete_task"]
-allocator = []
-sync = ["interrupt"]
-time = ["interrupt"]
-hooks = []
-interrupt = []
-cpu_clock = []
-delete_task = []
-critical_section_impl = ["critical-section/restore-state-u32"]
-std = ["critical-section/std"]
+    allocator = []
+    cpu_clock = []
+    critical_section_impl = ["critical-section/restore-state-u32"]
+    default = ["allocator", "sync", "time", "hooks", "interrupt", "delete_task"]
+    delete_task = []
+    hooks = []
+    interrupt = []
+    std = ["critical-section/std"]
+    sync = ["interrupt"]
+    time = ["interrupt"]
 
 [dependencies]
-critical-section = "1"
-mutex-traits = "1"
-os-trait = "0.3"
+    critical-section = "1"
+    mutex-traits = "1"
+    os-trait = "0.3"

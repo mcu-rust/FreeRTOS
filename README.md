@@ -30,18 +30,15 @@ info provided by your apps `build.rs`:
 1. Checkout FreeRTOS: https://github.com/FreeRTOS/FreeRTOS-Kernel
 
 1. Add dependencies to your Rust apps `Cargo.toml`
-    ```toml
-    [dependencies]
-    freertos-rust = "*"
-
-    [build-dependencies]
-    freertos-cargo-build = "*"
+    ```shell
+    cargo add freertos-rs
+    cargo add --build freertos-build
     ```
 
 1. Add this snippet to your apps `build.rs`:
     ```rust
     fn main() {
-        let mut b = freertos_cargo_build::Builder::new();
+        let mut b = freertos_build::Builder::new();
 
         // Path to FreeRTOS kernel or set ENV "FREERTOS_SRC" instead
         b.freertos("path/to/FreeRTOS-Kernel");

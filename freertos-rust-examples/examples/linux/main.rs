@@ -1,4 +1,4 @@
-use freertos_rust::*;
+use freertos_rs::*;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;

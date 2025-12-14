@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  freertos-rust-stable:
+  build:
     name: Build freertos-rust using stable
     runs-on: ubuntu-latest
     steps:
@@ -29,9 +29,9 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
     - run: cargo fmt --all --check
     - name: Build
-      run: cargo build --verbose --package freertos-rust
+      run: cargo build --verbose
 
-  freertos-rust-examples:
+  examples:
     name: Build examples
     strategy:
       matrix:
