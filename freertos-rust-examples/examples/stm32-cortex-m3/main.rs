@@ -4,8 +4,8 @@
 use core::panic::PanicInfo;
 use cortex_m::asm;
 use cortex_m_rt::exception;
-use cortex_m_rt::{entry, ExceptionFrame};
 use freertos_rust::*;
+use cortex_m_rt::{ExceptionFrame, entry};
 use stm32f1xx_hal::{gpio::PinState, pac, prelude::*};
 
 #[global_allocator]

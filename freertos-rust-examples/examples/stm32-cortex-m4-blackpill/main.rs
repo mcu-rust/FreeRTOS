@@ -4,7 +4,7 @@
 use core::panic::PanicInfo;
 use cortex_m::asm;
 use cortex_m_rt::exception;
-use cortex_m_rt::{entry, ExceptionFrame};
+use cortex_m_rt::{ExceptionFrame, entry};
 use embedded_hal::digital::OutputPin;
 use freertos_rust::*;
 use stm32f4xx_hal::gpio::*;
@@ -40,11 +40,13 @@ fn app_main() -> ! {
         .name("hello")
         .stack_size(128)
         .priority(TaskPriority(2))
-        .start(move |_| loop {
-            CurrentTask::delay(Duration::ms(1000));
-            device.set_led(true);
-            CurrentTask::delay(Duration::ms(1000));
-            device.set_led(false);
+        .start(move |_| {
+            loop {
+                CurrentTask::delay(Duration::ms(1000));
+                device.set_led(true);
+                CurrentTask::delay(Duration::ms(1000));
+                device.set_led(false);
+            }
         })
         .unwrap();
 

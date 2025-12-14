@@ -27,7 +27,9 @@ impl EventGroup {
     /// `handle` must be a valid FreeRTOS event group handle.
     #[inline]
     pub unsafe fn from_raw_handle(handle: FreeRtosEventGroupHandle) -> Self {
-        Self { event_group: handle }
+        Self {
+            event_group: handle,
+        }
     }
     #[inline]
     pub fn raw_handle(&self) -> FreeRtosEventGroupHandle {
@@ -46,12 +48,38 @@ impl EventGroup {
         unsafe { freertos_rs_event_group_clear_bits(self.event_group, bits_to_clear) }
     }
 
-    pub fn wait_bits<D: DurationTicks>(&self, bits_to_wait_for: FreeRtosEventBitsType, clear_on_exit: FreeRtosBaseType, wait_for_all_bits: FreeRtosBaseType, duration: D) -> FreeRtosEventBitsType {
-        unsafe { freertos_rs_event_group_wait_bits(self.event_group, bits_to_wait_for, clear_on_exit, wait_for_all_bits, duration.to_ticks()) }
+    pub fn wait_bits<D: DurationTicks>(
+        &self,
+        bits_to_wait_for: FreeRtosEventBitsType,
+        clear_on_exit: FreeRtosBaseType,
+        wait_for_all_bits: FreeRtosBaseType,
+        duration: D,
+    ) -> FreeRtosEventBitsType {
+        unsafe {
+            freertos_rs_event_group_wait_bits(
+                self.event_group,
+                bits_to_wait_for,
+                clear_on_exit,
+                wait_for_all_bits,
+                duration.to_ticks(),
+            )
+        }
     }
 
-    pub fn sync<D: DurationTicks>(&self, bits_to_set: FreeRtosEventBitsType, bits_to_wait_for: FreeRtosEventBitsType, duration: D) -> FreeRtosEventBitsType {
-        unsafe { freertos_rs_event_group_sync(self.event_group, bits_to_set, bits_to_wait_for, duration.to_ticks()) }
+    pub fn sync<D: DurationTicks>(
+        &self,
+        bits_to_set: FreeRtosEventBitsType,
+        bits_to_wait_for: FreeRtosEventBitsType,
+        duration: D,
+    ) -> FreeRtosEventBitsType {
+        unsafe {
+            freertos_rs_event_group_sync(
+                self.event_group,
+                bits_to_set,
+                bits_to_wait_for,
+                duration.to_ticks(),
+            )
+        }
     }
 }
 

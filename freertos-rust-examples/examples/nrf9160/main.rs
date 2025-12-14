@@ -3,10 +3,9 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
-
-use cortex_m_rt::{entry, exception, ExceptionFrame};
-use nrf9160_pac as nrf9160;
 use cortex_m::asm;
+use cortex_m_rt::{ExceptionFrame, entry, exception};
+use nrf9160_pac as nrf9160;
 
 use core::panic::PanicInfo;
 use freertos_rust::*;
@@ -19,7 +18,6 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-
 #[exception]
 unsafe fn DefaultHandler(_irqn: i16) {
     do_blink();
@@ -29,7 +27,6 @@ unsafe fn DefaultHandler(_irqn: i16) {
     //board_set_led(true);
     //panic!("Exception: {}", irqn);
 }
-
 
 #[exception]
 unsafe fn HardFault(_ef: &ExceptionFrame) -> ! {
@@ -62,13 +59,16 @@ fn do_blink() {
 fn main() -> ! {
     //asm::nop(); // To not have main optimize to abort in release mode, remove when you add code
 
-    let h = Task::new().name("hello").stack_size(512).priority(TaskPriority(1)).start(|_this_task| {
-        // Blink forever
-        do_blink();
-        loop {
-
-        }
-    }).unwrap();
+    let h = Task::new()
+        .name("hello")
+        .stack_size(512)
+        .priority(TaskPriority(1))
+        .start(|_this_task| {
+            // Blink forever
+            do_blink();
+            loop {}
+        })
+        .unwrap();
 
     FreeRtosUtils::start_scheduler();
 }

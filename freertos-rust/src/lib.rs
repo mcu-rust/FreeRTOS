@@ -75,16 +75,17 @@ mod base;
 mod critical;
 #[cfg(feature = "time")]
 mod delays;
+#[cfg(feature = "sync")]
+mod event_group;
 #[cfg(feature = "interrupt")]
 mod isr;
 #[cfg(feature = "sync")]
 mod mutex;
+mod os_traits_impls;
 #[cfg(feature = "sync")]
 mod queue;
 #[cfg(feature = "sync")]
 mod semaphore;
-#[cfg(feature = "sync")]
-mod event_group;
 #[cfg(any(feature = "time", feature = "sync"))]
 mod task;
 #[cfg(feature = "time")]
@@ -92,7 +93,6 @@ mod timers;
 #[cfg(any(feature = "time", feature = "sync"))]
 mod units;
 mod utils;
-mod os_traits_impls;
 
 #[cfg(feature = "sync")]
 pub mod patterns;
@@ -109,6 +109,8 @@ pub use crate::base::FreeRtosError;
 pub use crate::critical::*;
 #[cfg(feature = "time")]
 pub use crate::delays::*;
+#[cfg(feature = "sync")]
+pub use crate::event_group::*;
 #[cfg(feature = "hooks")]
 pub use crate::hooks::*;
 #[cfg(feature = "interrupt")]
@@ -119,8 +121,6 @@ pub use crate::mutex::*;
 pub use crate::queue::*;
 #[cfg(feature = "sync")]
 pub use crate::semaphore::*;
-#[cfg(feature = "sync")]
-pub use crate::event_group::*;
 #[cfg(any(feature = "time", feature = "sync"))]
 pub use crate::task::*;
 #[cfg(feature = "time")]
@@ -128,7 +128,7 @@ pub use crate::timers::*;
 #[cfg(any(feature = "time", feature = "sync"))]
 pub use crate::units::*;
 
+pub use crate::os_traits_impls::*;
 #[cfg(feature = "cpu_clock")]
 pub use crate::utils::cpu_clock_hz;
 pub use crate::utils::shim_sanity_check;
-pub use crate::os_traits_impls::*;

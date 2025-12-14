@@ -1,6 +1,6 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
-use os_trait::{prelude::*, FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs};
+use os_trait::{FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs, prelude::*};
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
 pub struct FreeRTOS<T, N> {

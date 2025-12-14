@@ -27,6 +27,7 @@ jobs:
         key: ${{ runner.os }}-${{ runner.arch }}-stable
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
+    - run: cargo fmt --all --check
     - name: Build
       run: cargo build --verbose --package freertos-rust
 
