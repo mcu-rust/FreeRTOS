@@ -1,8 +1,11 @@
-# FreeRTOS-next
+# FreeRTOS-Next
 
 This project is based on code from [freertos.rs](https://github.com/hashmismatch/freertos.rs) and [FreeRTOS-rust](https://github.com/lobaro/FreeRTOS-rust) and some additions to
- simplify the usage of [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel) in embedded applications written
- in Rust.
+ simplify the usage of [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel) in embedded applications written in Rust.
+
+Crates:
+- [freertos-next](https://crates.io/crates/freertos-next)
+- [freertos-build](https://crates.io/crates/freertos-build)
 
 In contrast to freertos.rs this crate differs in these points:
 

@@ -20,6 +20,5 @@ jobs:
       - uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ steps.auth.outputs.token }}
-          # dry-run: ${{ github.ref_type != 'tag' }}
-          dry-run: true
+          dry-run: ${{ github.ref_type != 'tag' }}
           ignore-unpublished-changes: true
