@@ -152,7 +152,7 @@ impl<'mutex, T: ?Sized> Drop for SuspendSchedulerGuard<'mutex, T> {
 mod critical_section_impl {
     use super::*;
     use crate::is_in_isr;
-    use critical_section::{set_impl, Impl, RawRestoreState};
+    use critical_section::{Impl, RawRestoreState, set_impl};
 
     struct FreeRtosCriticalSection;
     set_impl!(FreeRtosCriticalSection);
@@ -160,18 +160,20 @@ mod critical_section_impl {
     unsafe impl Impl for FreeRtosCriticalSection {
         unsafe fn acquire() -> RawRestoreState {
             if is_in_isr() {
-                freertos_rs_enter_critical_from_isr()
+                unsafe { freertos_rs_enter_critical_from_isr() }
             } else {
-                freertos_rs_enter_critical();
+                unsafe {
+                    freertos_rs_enter_critical();
+                }
                 0
             }
         }
 
         unsafe fn release(restore_state: RawRestoreState) {
             if is_in_isr() {
-                freertos_rs_exit_critical_from_isr(restore_state);
+                unsafe { freertos_rs_exit_critical_from_isr(restore_state) };
             } else {
-                freertos_rs_exit_critical()
+                unsafe { freertos_rs_exit_critical() }
             }
         }
     }

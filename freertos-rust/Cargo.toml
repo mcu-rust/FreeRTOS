@@ -2,7 +2,7 @@
 name = "freertos-rust"
 version = "0.3.0"
 authors = ["Jalon Wong <jalonwong@gmail.com>"]
-edition = "2018"
+edition = "2024"
 description = """
 Create to use FreeRTOS in rust projects.
 The freertos-cargo-build crate can be used to build and link FreeRTOS from source inside build.rs.

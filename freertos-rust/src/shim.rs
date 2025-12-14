@@ -2,7 +2,7 @@
 
 use crate::base::*;
 
-extern "C" {
+unsafe extern "C" {
     pub fn freertos_rs_invoke_configASSERT();
     pub fn freertos_rs_vTaskStartScheduler() -> !;
     pub fn freertos_rt_xTaskGetSchedulerState() -> FreeRtosBaseType;

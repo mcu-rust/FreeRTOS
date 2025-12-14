@@ -96,14 +96,16 @@ impl Timer {
             let name = name.as_bytes();
             let name_len = name.len();
 
-            let ret = freertos_rs_timer_create(
-                name.as_ptr(),
-                name_len as u8,
-                period_ticks,
-                if auto_reload { 1 } else { 0 },
-                param_ptr,
-                timer_callback,
-            );
+            let ret = unsafe {
+                freertos_rs_timer_create(
+                    name.as_ptr(),
+                    name_len as u8,
+                    period_ticks,
+                    if auto_reload { 1 } else { 0 },
+                    param_ptr,
+                    timer_callback,
+                )
+            };
 
             ((ret as usize) != 0, ret)
         };

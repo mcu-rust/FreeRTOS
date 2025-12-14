@@ -30,7 +30,7 @@ pub static FREERTOS_HOOKS: FreeRtosHooks = FreeRtosHooks {
 };
 
 #[allow(unused_doc_comments)]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn vAssertCalled(file_name_ptr: FreeRtosCharPtr, line: FreeRtosUBaseType) {
     let file_name = unsafe { str_from_c_string(file_name_ptr).unwrap() };
 

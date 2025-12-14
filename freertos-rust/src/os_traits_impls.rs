@@ -13,8 +13,8 @@ unsafe impl<T, N> Sync for FreeRTOS<T, N> {}
 
 impl<T, N> OsInterface for FreeRTOS<T, N>
 where
-    T: TickInstant,
-    N: NotifyBuilder,
+    T: TickInstant + 'static,
+    N: NotifyBuilder + 'static,
 {
     type RawMutex = FakeRawMutex;
     type Notifier = N::Notifier;

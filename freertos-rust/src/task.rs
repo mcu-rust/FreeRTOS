@@ -116,7 +116,9 @@ impl Task {
     /// `handle` must be a valid FreeRTOS task handle.
     #[inline]
     pub unsafe fn from_raw_handle(handle: FreeRtosTaskHandle) -> Self {
-        Self { task_handle: handle }
+        Self {
+            task_handle: handle,
+        }
     }
     #[inline]
     pub fn raw_handle(&self) -> FreeRtosTaskHandle {
@@ -129,9 +131,9 @@ impl Task {
     }
 
     pub fn suspend_all() {
-      unsafe {
-          freertos_rs_vTaskSuspendAll();
-      }
+        unsafe {
+            freertos_rs_vTaskSuspendAll();
+        }
     }
 
     /// # Safety
@@ -158,15 +160,17 @@ impl Task {
             let name_len = name.len();
             let mut task_handle = core::ptr::null();
 
-            let ret = freertos_rs_spawn_task(
-                thread_start,
-                param_ptr,
-                name.as_ptr(),
-                name_len as u8,
-                stack_size,
-                priority.to_freertos(),
-                &mut task_handle,
-            );
+            let ret = unsafe {
+                freertos_rs_spawn_task(
+                    thread_start,
+                    param_ptr,
+                    name.as_ptr(),
+                    name_len as u8,
+                    stack_size,
+                    priority.to_freertos(),
+                    &mut task_handle,
+                )
+            };
 
             (ret == 0, task_handle)
         };
@@ -330,13 +334,11 @@ impl CurrentTask {
     }
 
     pub fn suspend() {
-        unsafe {
-            freertos_rs_suspend_task(0 as FreeRtosTaskHandle)
-        }
+        unsafe { freertos_rs_suspend_task(0 as FreeRtosTaskHandle) }
     }
 
     pub fn yield_now() {
-        unsafe { freertos_rs_task_yield()}
+        unsafe { freertos_rs_task_yield() }
     }
 
     /// Take the notification and either clear the notification value or decrement it by one.
@@ -360,35 +362,41 @@ impl fmt::Display for FreeRtosSystemState {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         fmt.write_str("FreeRTOS tasks\r\n")?;
 
-        write!(fmt, "{id: <6} | {name: <16} | {state: <9} | {priority: <8} | {stack: >10} | {cpu_abs: >10} | {cpu_rel: >4}\r\n",
-               id = "ID",
-               name = "Name",
-               state = "State",
-               priority = "Priority",
-               stack = "Stack left",
-               cpu_abs = "CPU",
-               cpu_rel = "%"
+        write!(
+            fmt,
+            "{id: <6} | {name: <16} | {state: <9} | {priority: <8} | {stack: >10} | {cpu_abs: >10} | {cpu_rel: >4}\r\n",
+            id = "ID",
+            name = "Name",
+            state = "State",
+            priority = "Priority",
+            stack = "Stack left",
+            cpu_abs = "CPU",
+            cpu_rel = "%"
         )?;
 
         for task in &self.tasks {
-            write!(fmt, "{id: <6} | {name: <16} | {state: <9} | {priority: <8} | {stack: >10} | {cpu_abs: >10} | {cpu_rel: >4}\r\n",
-                   id = task.task_number,
-                   name = task.name,
-                   state = format!("{:?}", task.task_state),
-                   priority = task.current_priority.0,
-                   stack = task.stack_high_water_mark,
-                   cpu_abs = task.run_time_counter,
-                   cpu_rel = if self.total_run_time > 0 && task.run_time_counter <= self.total_run_time {
-                       let p = (((task.run_time_counter as u64) * 100) / self.total_run_time as u64) as u32;
-                       let ps = if p == 0 && task.run_time_counter > 0 {
-                           "<1".to_string()
-                       } else {
-                           p.to_string()
-                       };
-                       format!("{: >3}%", ps)
-                   } else {
-                       "-".to_string()
-                   }
+            write!(
+                fmt,
+                "{id: <6} | {name: <16} | {state: <9} | {priority: <8} | {stack: >10} | {cpu_abs: >10} | {cpu_rel: >4}\r\n",
+                id = task.task_number,
+                name = task.name,
+                state = format!("{:?}", task.task_state),
+                priority = task.current_priority.0,
+                stack = task.stack_high_water_mark,
+                cpu_abs = task.run_time_counter,
+                cpu_rel = if self.total_run_time > 0 && task.run_time_counter <= self.total_run_time
+                {
+                    let p = (((task.run_time_counter as u64) * 100) / self.total_run_time as u64)
+                        as u32;
+                    let ps = if p == 0 && task.run_time_counter > 0 {
+                        "<1".to_string()
+                    } else {
+                        p.to_string()
+                    };
+                    format!("{: >3}%", ps)
+                } else {
+                    "-".to_string()
+                }
             )?;
         }
 
@@ -416,9 +424,9 @@ pub struct FreeRtosUtils;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum FreeRtosSchedulerState {
-  Suspended,
-  NotStarted,
-  Running
+    Suspended,
+    NotStarted,
+    Running,
 }
 
 impl FreeRtosUtils {
@@ -435,14 +443,14 @@ impl FreeRtosUtils {
     }
 
     pub fn scheduler_state() -> FreeRtosSchedulerState {
-      unsafe {
-        match freertos_rt_xTaskGetSchedulerState() {
-          0 => FreeRtosSchedulerState::Suspended,
-          1 => FreeRtosSchedulerState::NotStarted,
-          2 => FreeRtosSchedulerState::Running,
-          _ => unreachable!(),
+        unsafe {
+            match freertos_rt_xTaskGetSchedulerState() {
+                0 => FreeRtosSchedulerState::Suspended,
+                1 => FreeRtosSchedulerState::NotStarted,
+                2 => FreeRtosSchedulerState::Running,
+                _ => unreachable!(),
+            }
         }
-      }
     }
 
     pub fn get_tick_count() -> FreeRtosTickType {
@@ -478,7 +486,8 @@ impl FreeRtosUtils {
                     task_handle: t.handle,
                 },
                 name: unsafe { str_from_c_string(t.task_name) }
-                    .unwrap_or_else(|_| "?").to_string(),
+                    .unwrap_or_else(|_| "?")
+                    .to_string(),
                 task_number: t.task_number,
                 task_state: t.task_state,
                 current_priority: TaskPriority(t.current_priority as u8),

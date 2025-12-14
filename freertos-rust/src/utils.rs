@@ -13,7 +13,7 @@ pub struct TypeSizeError {
 
 #[cfg(feature = "cpu_clock")]
 pub fn cpu_clock_hz() -> u32 {
-  unsafe { freertos_rs_get_configCPU_CLOCK_HZ() }
+    unsafe { freertos_rs_get_configCPU_CLOCK_HZ() }
 }
 
 /// Perform checks whether the C FreeRTOS shim and Rust agree on the sizes of used types.
@@ -57,7 +57,7 @@ pub fn shim_sanity_check() -> Result<(), TypeSizeError> {
 /// `str` must be a pointer to the beginning of nul-terminated sequence of bytes.
 #[cfg(any(feature = "time", feature = "hooks", feature = "sync"))]
 pub unsafe fn str_from_c_string<'a>(str: *const u8) -> Result<&'a str, FreeRtosError> {
-    match CStr::from_ptr(str as *const _).to_str() {
+    match unsafe { CStr::from_ptr(str as *const _).to_str() } {
         Ok(s) => Ok(s),
         Err(_) => Err(FreeRtosError::StringConversionError),
     }

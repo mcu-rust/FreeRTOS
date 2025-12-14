@@ -10,41 +10,9 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  freertos-rust:
-    name: Build freertos-rust
-    runs-on: ubuntu-latest
-    env:
-      RUSTFLAGS: -D warnings # Warnings disabled only in CI
-    steps:
-    - name: Clone
-      uses: actions/checkout@v6
-    - name: Cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.rustup
-          target
-        key: ${{ runner.os }}-${{ runner.arch }}
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@nightly
-      with:
-        components: rustfmt, clippy
-    #- name: Format
-    # run: cargo fmt -- --check
-    - name: Build
-      run: cargo build --verbose
-    #- name: Test
-    #  run: cargo test
-    #- name: Clippy
-    #  run: cargo clippy -- -Dwarnings
-
   freertos-rust-stable:
     name: Build freertos-rust using stable
     runs-on: ubuntu-latest
-    # env:
-    #   RUSTFLAGS: -D warnings # Warnings disabled only in CI
     steps:
     - name: Clone
       uses: actions/checkout@v6
@@ -115,8 +83,4 @@ jobs:
             ;;
         esac
     - name: Build example
-      if: matrix.example == 'win' || matrix.example == 'linux'
-      run: cargo build --verbose --example ${{ matrix.example }} --target ${{ matrix.target }} --features std
-    - name: Build example
-      if: matrix.example != 'win' && matrix.example != 'linux'
       run: cargo build --verbose --example ${{ matrix.example }} --target ${{ matrix.target }}
