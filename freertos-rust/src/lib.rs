@@ -24,7 +24,7 @@
 //! Spawning a new task
 //!
 //! ```rust
-//! # use freertos_rs::*;
+//! # use freertos_next::*;
 //! Task::new().name("hello").stack_size(128).start(|| {
 //! 	loop {
 //! 		println!("Hello world!");
@@ -38,7 +38,7 @@
 //! Queue
 //!
 //! ```rust
-//! # use freertos_rs::*;
+//! # use freertos_next::*;
 //! let q = Queue::new(10).unwrap();
 //! q.send(10, Duration::ms(5)).unwrap();
 //! q.receive(Duration::infinite()).unwrap();
@@ -47,7 +47,7 @@
 //! Mutex
 //!
 //! ```rust
-//! # use freertos_rs::*;
+//! # use freertos_next::*;
 //! let m = Mutex::new(0).unwrap();
 //! {
 //! 	let mut v = m.lock(Duration::infinite()).unwrap();

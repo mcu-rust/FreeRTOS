@@ -8,7 +8,7 @@ use cortex_m_rt::{ExceptionFrame, entry, exception};
 use nrf9160_pac as nrf9160;
 
 use core::panic::PanicInfo;
-use freertos_rs::*;
+use freertos_next::*;
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;

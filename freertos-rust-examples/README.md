@@ -2,26 +2,16 @@
 
 ## Setup
 
-We need to use nightly toolchain to support all examples.
-Even if some might run with the stable toolchain as well.
-
-**GNU Toolchain** is required for debugging some examples (e.g. windows):
-
-    rustup default nightly
-    rustup toolchain install nightly-gnu
-    rustup default nightly-gnu
-    
 _If you have issues that the build does not ends, try th MSVC Toolchain!_
-    
+
 **MSVC Toolchain** is not working for debugging:
 
     rustup toolchain install stable-msvc
-    rustup default nightly-msvc
-    
+
 Add you target, e.g. for Cortex-M3 (ARMv7-M architecture):
 
     rustup target add thumbv7m-none-eabi
-    
+
 Install required/useful tooling
 
     cargo install cargo-binutils
@@ -30,7 +20,7 @@ Install required/useful tooling
 ### Checkout
 
 The FreeRTOS Kernel source is a submodule of this repo, referencing the official FreeRTOS-Kernel distribution.
-Currently tagged at [v10.5.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/tag/V10.5.0).  
+Currently tagged at [v11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/tag/V11.2.0).
 To checkout the submodule with the kernel sources:
 
     git submodule update --init --recursive
@@ -38,8 +28,8 @@ To checkout the submodule with the kernel sources:
 ### Build
 
     cargo build --example win
-    
-    
+
+
 To see all errors use:
 
     cargo build -vv
@@ -53,7 +43,7 @@ Prepare the build with:
 
     rustup default nightly-x86_64-pc-windows-gnu
     rustup target add x86_64-pc-windows-msvc
-    
+
 Run the build
 
     cargo run --package freertos-rust-examples --example win --target x86_64-pc-windows-msvc
@@ -67,9 +57,9 @@ Prepare the build with:
     rustup target add x86_64-unknown-linux-gnu
     rustup component add llvm-tools-preview
     cargo install cargo-binutils
-    
+
     sudo apt install gcc g++ make
-    
+
 Run the build
 
     cargo build --package freertos-rust-examples --example linux --target x86_64-unknown-linux-gnu
@@ -112,9 +102,9 @@ Setup:
 
     rustup default nightly-x86_64-pc-windows-msvc
     rustup target add thumbv8m.main-none-eabihf
-    
+
 Build:
-    
+
     cargo build --package freertos-rust-examples --example nrf9160 --target thumbv8m.main-none-eabihf
 
 Create hex file to be flashed:

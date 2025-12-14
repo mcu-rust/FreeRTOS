@@ -1,44 +1,56 @@
 [package]
-name = "freertos-rust-examples"
-version = "0.1.1"
-authors = ["Tobias Kaupat <tk@lobaro.de>"]
-edition = "2024"
-description = """
+    authors = ["Tobias Kaupat <tk@lobaro.de>"]
+    description = """
 Create to use FreeRTOS in rust projects. It contains binaries for demos on some architecutres.
 """
-keywords = ["FreeRTOS", "embedded", "demo", "examples"]
-repository = "https://github.com/lobaro/FreeRTOS-rust"
+    edition = "2024"
+    keywords = ["FreeRTOS", "embedded", "demo", "examples"]
+    name = "freertos-rust-examples"
+    repository = "https://github.com/lobaro/FreeRTOS-rust"
+    version = "0.1.1"
 
 
 # Example: stm32-cortex-m3
 [target.thumbv7m-none-eabi.dependencies]
-freertos-rs = {path = "../freertos-rust", features = ["critical_section_impl"]}
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-stm32f1xx-hal = {version = "0.10", features = ["rt", "stm32f103", "medium"]}
+    cortex-m = "0.7"
+    cortex-m-rt = "0.7"
+    freertos-next = { path = "../freertos-rust", features = [
+        "critical_section_impl",
+    ] }
+    stm32f1xx-hal = { version = "0.10", features = [
+        "rt",
+        "stm32f103",
+        "medium",
+    ] }
 
 # Example: stm32-cortex-m4-blackpill
 [target.thumbv7em-none-eabihf.dependencies]
-freertos-rs = {path = "../freertos-rust"}
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-embedded-hal = "1.0"
-stm32f4xx-hal = {version = "0.22", features = ["stm32f411"]}
+    cortex-m = "0.7"
+    cortex-m-rt = "0.7"
+    embedded-hal = "1.0"
+    freertos-next = { path = "../freertos-rust" }
+    stm32f4xx-hal = { version = "0.22", features = ["stm32f411"] }
 
 # Example: nrf9160
 [target."thumbv8m.main-none-eabihf".dependencies]
-freertos-rs = {path = "../freertos-rust", features = ["critical_section_impl"]}
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-nrf9160-pac = {version = "0.12", features = ["rt"]}
+    cortex-m = "0.7"
+    cortex-m-rt = "0.7"
+    freertos-next = { path = "../freertos-rust", features = [
+        "critical_section_impl",
+    ] }
+    nrf9160-pac = { version = "0.12", features = ["rt"] }
 
 # Example: win
 [target.x86_64-pc-windows-msvc.dependencies]
-freertos-rs = {path = "../freertos-rust", features = ["critical_section_impl"]}
+    freertos-next = { path = "../freertos-rust", features = [
+        "critical_section_impl",
+    ] }
 
 # Example: linux
 [target.x86_64-unknown-linux-gnu.dependencies]
-freertos-rs = {path = "../freertos-rust", features = ["critical_section_impl"]}
+    freertos-next = { path = "../freertos-rust", features = [
+        "critical_section_impl",
+    ] }
 
 [build-dependencies]
-freertos-build = {path = "../freertos-cargo-build"}
+    freertos-build = { path = "../freertos-cargo-build" }

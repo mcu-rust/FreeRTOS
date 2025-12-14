@@ -5,7 +5,7 @@ use core::panic::PanicInfo;
 use cortex_m::asm;
 use cortex_m_rt::exception;
 use cortex_m_rt::{ExceptionFrame, entry};
-use freertos_rs::*;
+use freertos_next::*;
 use stm32f1xx_hal::{gpio::PinState, pac, prelude::*};
 
 #[global_allocator]

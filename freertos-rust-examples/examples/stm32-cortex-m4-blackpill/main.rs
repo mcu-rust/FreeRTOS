@@ -6,7 +6,7 @@ use cortex_m::asm;
 use cortex_m_rt::exception;
 use cortex_m_rt::{ExceptionFrame, entry};
 use embedded_hal::digital::OutputPin;
-use freertos_rs::*;
+use freertos_next::*;
 use stm32f4xx_hal::gpio::*;
 
 use stm32f4xx_hal as hal;

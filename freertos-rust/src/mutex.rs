@@ -238,7 +238,7 @@ impl fmt::Debug for MutexRecursive {
 }
 
 use mutex_traits::{ConstInit, RawMutex};
-/// [`mutex-traits`] implementation
+/// `mutex-traits` implementation
 pub struct FreeRtosRawMutex {
     inner: UnsafeCell<FreeRtosSemaphoreHandle>,
 }

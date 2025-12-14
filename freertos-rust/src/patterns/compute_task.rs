@@ -76,8 +76,8 @@ impl ComputeTaskBuilder for TaskBuilder {
 /// Sample usage:
 ///
 /// ```rust
-/// # use freertos_rs::*;
-/// use freertos_rs::patterns::compute_task::*;
+/// # use freertos_next::*;
+/// use freertos_next::patterns::compute_task::*;
 /// let task = Task::new().compute(|| {
 /// 	CurrentTask::delay(Duration::ms(100));
 /// 	42

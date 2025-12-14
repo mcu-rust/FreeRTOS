@@ -1,27 +1,28 @@
 [package]
     authors = ["Jalon Wong <jalonwong@gmail.com>"]
     description = """Create to use FreeRTOS in rust projects.
-The freertos-cargo-build crate can be used to build and link FreeRTOS from source inside build.rs."""
-    documentation = "https://docs.rs/freertos-rs"
+The freertos-build crate can be used to build and link FreeRTOS from source inside build.rs."""
+    documentation = "https://docs.rs/freertos-next"
     edition = "2024"
     keywords = ["FreeRTOS", "RTOS", "embedded", "MCU"]
     license = "MIT"
     links = "freertos"
-    name = "freertos-rs"
+    name = "freertos-next"
     readme = "README.md"
     repository = "https://github.com/mcu-rust/FreeRTOS"
     version = "0.3.0"
 
 
 [lib]
-    name = "freertos_rs"
+    name = "freertos_next"
     path = "src/lib.rs"
 
 [features]
+    default = ["allocator", "sync", "time", "hooks", "interrupt", "delete_task"]
+
     allocator = []
     cpu_clock = []
     critical_section_impl = ["critical-section/restore-state-u32"]
-    default = ["allocator", "sync", "time", "hooks", "interrupt", "delete_task"]
     delete_task = []
     hooks = []
     interrupt = []

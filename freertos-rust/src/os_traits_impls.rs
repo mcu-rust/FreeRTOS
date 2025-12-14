@@ -189,7 +189,7 @@ impl NotifyWaiter for SemaphoreNotifyWaiter {
     }
 }
 
-/// [`DelayNs`](`embedded_hal::delay::DelayNs`) implementation
+/// `DelayNs` implementation
 pub struct FreeRtosTickDelayNs<T> {
     _t: PhantomData<T>,
 }

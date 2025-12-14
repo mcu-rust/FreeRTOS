@@ -17,8 +17,8 @@ const ENV_KEY_FREERTOS_SRC: &str = "FREERTOS_SRC";
 /// When not set, you can use the Builder to specify the path
 const ENV_KEY_FREERTOS_CONFIG: &str = "DEP_FREERTOS_CONFIG";
 
-/// FreeRTOS shim.c file to enable usage of FreeRTOS with freertos-rust crate
-/// This variable is set by freertos-rust build.rs
+/// FreeRTOS shim.c file to enable usage of FreeRTOS
+/// This variable is set by build.rs
 const ENV_KEY_FREERTOS_SHIM: &str = "DEP_FREERTOS_SHIM";
 
 #[derive(Clone, Debug)]
@@ -91,7 +91,7 @@ impl Builder {
         self.freertos_config_dir = path.as_ref().to_path_buf();
     }
 
-    /// Set the path to shim.c (required for freertos-rust)
+    /// Set the path to shim.c
     /// Default is loaded from ENV variable, see: ENV_KEY_FREERTOS_SHIM
     pub fn freertos_shim<P: AsRef<Path>>(&mut self, path: P) {
         self.freertos_shim = path.as_ref().to_path_buf();
@@ -283,11 +283,11 @@ impl Builder {
             )));
         }
 
-        // Add the freertos shim.c to support freertos-rust
+        // Add the freertos shim.c
         let shim_c = self.shim_c_file();
         if !shim_c.is_file() {
             return Err(Error::new(&format!(
-                "File freertos_shim '{}' does not exist, missing freertos-rust dependency?",
+                "File freertos_shim '{}' does not exist, missing freertos dependency?",
                 shim_c.to_str().unwrap()
             )));
         }
@@ -371,8 +371,8 @@ fn add_include_with_rerun<P: AsRef<Path>>(build: &mut Build, dir: P) {
 
 #[test]
 fn test_paths() {
-    env::set_var("FREERTOS_SRC", "some/path");
-    env::set_var("TARGET", "thumbv8m.main-none-eabihf");
+    unsafe { env::set_var("FREERTOS_SRC", "some/path") };
+    unsafe { env::set_var("TARGET", "thumbv8m.main-none-eabihf") };
     let b = Builder::new();
     assert_eq!(b.freertos_dir.to_str().unwrap(), "some/path");
 }
