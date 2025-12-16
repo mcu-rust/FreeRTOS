@@ -1,7 +1,15 @@
 # FreeRTOS-Next
+[![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
 
 This project is based on code from [freertos.rs](https://github.com/hashmismatch/freertos.rs) and [FreeRTOS-rust](https://github.com/lobaro/FreeRTOS-rust) and some additions to
  simplify the usage of [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel) in embedded applications written in Rust.
+
+ [stm32f1-FreeRTOS-example](https://github.com/mcu-rust/stm32f1-FreeRTOS-example) shows how to use this crate with [stm32f1-hal](https://crates.io/crates/stm32f1-hal) together.
+
+It implements some useful traits:
+- [os-trait](https://crates.io/crates/os-trait)
+- [critical-section](https://crates.io/crates/critical-section).
+- [mutex-traits](https://crates.io/crates/mutex-traits).
 
 Crates:
 - [freertos-next](https://crates.io/crates/freertos-next)

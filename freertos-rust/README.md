@@ -1,10 +1,19 @@
 # FreeRTOS-Next
 
+[![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
+
 Wrapper library to use FreeRTOS API in Rust.
 
 To build an embedded application with FreeRTOS please refer
-to [home](https://github.com/mcu-rust/FreeRTOS).
+to [repository](https://github.com/mcu-rust/FreeRTOS).
 It needs [freertos-build](https://crates.io/crates/freertos-build) to work with.
+
+ [stm32f1-FreeRTOS-example](https://github.com/mcu-rust/stm32f1-FreeRTOS-example) shows how to use this crate with [stm32f1-hal](https://crates.io/crates/stm32f1-hal) together.
+
+It implements some useful traits:
+- [os-trait](https://crates.io/crates/os-trait)
+- [critical-section](https://crates.io/crates/critical-section).
+- [mutex-traits](https://crates.io/crates/mutex-traits).
 
 ## Usage
 

@@ -1,8 +1,12 @@
 # freertos-build
+
+[![Crates.io](https://img.shields.io/crates/v/freertos-build.svg)](https://crates.io/crates/freertos-build)
+
+
 Helper crate for building FreeRTOS applications with Cargo and Rust using a `build.rs`.
 
 To build an embedded application with FreeRTOS please refer
-to [home](https://crates.io/crates/freertos-next).
+to [repository](https://crates.io/crates/freertos-next).
 
 
 The crate is published on [freertos-build](https://crates.io/crates/freertos-build)
