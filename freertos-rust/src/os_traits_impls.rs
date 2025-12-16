@@ -1,6 +1,8 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
-use os_trait::{FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs, prelude::*};
+use os_trait::{
+    FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs, TickTimeoutState, prelude::*,
+};
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
 pub struct FreeRTOS<T, N> {
@@ -20,6 +22,8 @@ where
     type Notifier = N::Notifier;
     type NotifyWaiter = N::Waiter;
     type Timeout = TickTimeoutNs<T>;
+    type TimeoutState = TickTimeoutState<T>;
+    type DelayNs = FreeRtosTickDelayNs<T>;
 
     const O: Self = Self {
         _t: PhantomData,
@@ -32,7 +36,7 @@ where
     }
 
     #[inline]
-    fn delay() -> impl DelayNs {
+    fn delay() -> Self::DelayNs {
         FreeRtosTickDelayNs::<T>::new()
     }
 

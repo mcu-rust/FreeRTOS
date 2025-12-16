@@ -5,6 +5,8 @@ To build an embedded application with FreeRTOS please refer
 to [home](https://crates.io/crates/freertos-next).
 
 
+The crate is published on [freertos-build](https://crates.io/crates/freertos-build)
+
 ## Usage
 
 ```shel
