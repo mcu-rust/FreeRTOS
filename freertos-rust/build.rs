@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::path::PathBuf;
 
@@ -20,4 +21,20 @@ fn main() {
             .to_str()
             .unwrap()
     );
+
+    let feature_define_map = HashMap::from([
+        ("delete_task", "INCLUDE_vTaskDelete"),
+        ("delay_until", "INCLUDE_vTaskDelayUntil"),
+    ]);
+
+    for (ft, def) in feature_define_map.iter() {
+        if check_feature(ft) {
+            println!("cargo:DEF_{}=1", def);
+        }
+    }
+}
+
+fn check_feature(s: &str) -> bool {
+    let ft = "CARGO_FEATURE_".to_string() + &s.to_uppercase();
+    env::var(ft).map_or(false, |v| v == "1")
 }

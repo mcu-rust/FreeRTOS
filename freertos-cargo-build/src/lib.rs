@@ -309,6 +309,8 @@ impl Builder {
         add_build_files_with_rerun(&mut b, self.freertos_shim_files()); // Shim C file
         add_build_file_with_rerun(&mut b, self.heap_c_file()); // Heap C file
 
+        setup_all_define(&mut b);
+
         println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_SRC}");
         println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_CONFIG}");
         println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_SHIM}");
@@ -367,6 +369,18 @@ fn add_include_with_rerun<P: AsRef<Path>>(build: &mut Build, dir: P) {
                 println!("cargo:rerun-if-changed={}", f_name.display());
             }
         });
+}
+
+fn setup_all_define(cc: &mut cc::Build) {
+    sync_define(cc, "INCLUDE_vTaskDelete");
+    sync_define(cc, "INCLUDE_vTaskDelayUntil");
+    cc.define("INCLUDE_vTaskDelay", "1");
+}
+
+fn sync_define(cc: &mut cc::Build, def: &str) {
+    let v = "DEP_FREERTOS_DEF_".to_string() + &def.to_uppercase();
+    let v_string = env::var(v).unwrap_or("0".to_string());
+    cc.define(def, v_string.as_str());
 }
 
 #[test]
