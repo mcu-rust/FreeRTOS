@@ -23,6 +23,7 @@ unsafe extern "C" {
     pub fn freertos_rs_get_number_of_tasks() -> FreeRtosUBaseType;
 
     pub fn freertos_rs_xTaskGetTickCount() -> FreeRtosTickType;
+    pub fn freertos_rs_xTaskGetTickCountFromISR() -> FreeRtosTickType;
 
     pub fn freertos_rs_create_recursive_mutex() -> FreeRtosSemaphoreHandle;
     pub fn freertos_rs_create_mutex() -> FreeRtosSemaphoreHandle;

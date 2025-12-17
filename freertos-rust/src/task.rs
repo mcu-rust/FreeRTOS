@@ -453,8 +453,15 @@ impl FreeRtosUtils {
         }
     }
 
+    #[inline]
     pub fn get_tick_count() -> FreeRtosTickType {
-        unsafe { freertos_rs_xTaskGetTickCount() }
+        unsafe {
+            if is_in_isr() {
+                freertos_rs_xTaskGetTickCountFromISR()
+            } else {
+                freertos_rs_xTaskGetTickCount()
+            }
+        }
     }
 
     pub fn get_tick_count_duration() -> Duration {

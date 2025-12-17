@@ -34,3 +34,6 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     critical-section = "1"
     mutex-traits = "1"
     os-trait = "0.6"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none", any(target_abi = "eabi", target_abi = "eabihf")))'.dependencies]
+    cortex-m = "0.7"

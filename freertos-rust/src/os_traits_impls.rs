@@ -1,34 +1,30 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
 use os_trait::{
-    FakeRawMutex, MicrosDurationU32, TickInstant, TickTimeoutNs, TickTimeoutState, prelude::*,
+    FakeRawMutex, KilohertzU32, MicrosDurationU32, TickInstant, TickTimeoutNs, TickTimeoutState,
+    prelude::*,
 };
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
-pub struct FreeRTOS<T, N> {
-    _t: PhantomData<T>,
+pub struct FreeRTOS<N> {
     _n: PhantomData<N>,
 }
 
-unsafe impl<T, N> Send for FreeRTOS<T, N> {}
-unsafe impl<T, N> Sync for FreeRTOS<T, N> {}
+unsafe impl<N> Send for FreeRTOS<N> {}
+unsafe impl<N> Sync for FreeRTOS<N> {}
 
-impl<T, N> OsInterface for FreeRTOS<T, N>
+impl<N> OsInterface for FreeRTOS<N>
 where
-    T: TickInstant + 'static,
     N: NotifyBuilder + 'static,
 {
     type RawMutex = FakeRawMutex;
     type Notifier = N::Notifier;
     type NotifyWaiter = N::Waiter;
-    type Timeout = TickTimeoutNs<T>;
-    type TimeoutState = TickTimeoutState<T>;
-    type Delay = FreeRtosTickDelayNs<T>;
+    type Timeout = TickTimeoutNs<FreeRtosTickInstant>;
+    type TimeoutState = TickTimeoutState<FreeRtosTickInstant>;
+    type Delay = FreeRtosTickDelayNs;
 
-    const O: Self = Self {
-        _t: PhantomData,
-        _n: PhantomData,
-    };
+    const O: Self = Self { _n: PhantomData };
 
     #[inline]
     fn yield_thread() {
@@ -37,12 +33,12 @@ where
 
     #[inline]
     fn timeout() -> Self::Timeout {
-        TickTimeoutNs::<T>::new()
+        TickTimeoutNs::<FreeRtosTickInstant>::new()
     }
 
     #[inline]
     fn delay() -> Self::Delay {
-        FreeRtosTickDelayNs::<T>::new()
+        FreeRtosTickDelayNs::new()
     }
 
     #[inline]
@@ -199,32 +195,25 @@ impl NotifyWaiter for SemaphoreNotifyWaiter {
 }
 
 /// `DelayNs` implementation
-pub struct FreeRtosTickDelayNs<T> {
-    _t: PhantomData<T>,
-}
+#[derive(Default)]
+pub struct FreeRtosTickDelayNs {}
 
-impl<T> FreeRtosTickDelayNs<T>
-where
-    T: TickInstant,
-{
-    pub fn new() -> Self {
-        Self { _t: PhantomData }
+impl FreeRtosTickDelayNs {
+    pub const fn new() -> Self {
+        Self {}
     }
 }
 
-impl<T> DelayNs for FreeRtosTickDelayNs<T>
-where
-    T: TickInstant,
-{
+impl DelayNs for FreeRtosTickDelayNs {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
-        let mut t = TickTimeoutNs::<T>::new().start_ns(ns);
+        let mut t = TickTimeoutNs::<FreeRtosTickInstant>::new().start_ns(ns);
         while !t.timeout() {}
     }
 
     #[inline]
     fn delay_us(&mut self, us: u32) {
-        let mut t = TickTimeoutNs::<T>::new().start_us(us);
+        let mut t = TickTimeoutNs::<FreeRtosTickInstant>::new().start_us(us);
         while !t.timeout() {
             CurrentTask::yield_now();
         }
@@ -233,5 +222,68 @@ where
     #[inline]
     fn delay_ms(&mut self, ms: u32) {
         CurrentTask::delay(Duration::ms(ms));
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct FreeRtosTickInstant {
+    sys_tick: u32,
+    tick_count: u32,
+}
+
+#[cfg(cortex_m)]
+impl TickInstant for FreeRtosTickInstant {
+    #[inline]
+    fn frequency() -> KilohertzU32 {
+        use os_trait::fugit::HertzU32;
+        HertzU32::from_raw(utils::cpu_clock_hz()).convert()
+    }
+
+    fn now() -> Self {
+        use core::sync::atomic::{Ordering, compiler_fence};
+        use cortex_m::peripheral::SYST;
+
+        let tick_count = FreeRtosUtils::get_tick_count();
+        let sys_tick = SYST::get_current();
+        compiler_fence(Ordering::Acquire);
+        let tick_count2 = FreeRtosUtils::get_tick_count();
+        let sys_tick2 = SYST::get_current();
+
+        if tick_count != tick_count2 {
+            Self {
+                sys_tick: sys_tick2,
+                tick_count: tick_count2,
+            }
+        } else {
+            Self {
+                sys_tick,
+                tick_count,
+            }
+        }
+    }
+
+    fn tick_since(self, earlier: Self) -> u32 {
+        use cortex_m::peripheral::SYST;
+        let reload = SYST::get_reload() + 1;
+        (self.tick_count - earlier.tick_count) * reload + earlier.sys_tick - self.sys_tick
+    }
+}
+
+#[cfg(not(cortex_m))]
+impl TickInstant for FreeRtosTickInstant {
+    #[inline]
+    fn frequency() -> KilohertzU32 {
+        todo!()
+    }
+
+    fn now() -> Self {
+        Self {
+            sys_tick: 0,
+            tick_count: 0,
+        }
+    }
+
+    fn tick_since(self, _earlier: Self) -> u32 {
+        self.tick_count + self.sys_tick
     }
 }
