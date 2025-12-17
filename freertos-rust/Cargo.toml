@@ -33,4 +33,4 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
 [dependencies]
     critical-section = "1"
     mutex-traits = "1"
-    os-trait = "0.5"
+    os-trait = "0.6"

@@ -23,7 +23,7 @@ where
     type NotifyWaiter = N::Waiter;
     type Timeout = TickTimeoutNs<T>;
     type TimeoutState = TickTimeoutState<T>;
-    type DelayNs = FreeRtosTickDelayNs<T>;
+    type Delay = FreeRtosTickDelayNs<T>;
 
     const O: Self = Self {
         _t: PhantomData,
@@ -36,7 +36,12 @@ where
     }
 
     #[inline]
-    fn delay() -> Self::DelayNs {
+    fn timeout() -> Self::Timeout {
+        TickTimeoutNs::<T>::new()
+    }
+
+    #[inline]
+    fn delay() -> Self::Delay {
         FreeRtosTickDelayNs::<T>::new()
     }
 
@@ -213,13 +218,13 @@ where
 {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
-        let mut t = TickTimeoutNs::<T>::start_ns(ns);
+        let mut t = TickTimeoutNs::<T>::new().start_ns(ns);
         while !t.timeout() {}
     }
 
     #[inline]
     fn delay_us(&mut self, us: u32) {
-        let mut t = TickTimeoutNs::<T>::start_us(us);
+        let mut t = TickTimeoutNs::<T>::new().start_us(us);
         while !t.timeout() {
             CurrentTask::yield_now();
         }
