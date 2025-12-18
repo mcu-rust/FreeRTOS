@@ -2,11 +2,11 @@
     authors = ["Jalon Wong <jalonwong@gmail.com>"]
     description = "Utility lib for building & using FreeRTOS in rust projects inside the build.rs."
     edition = "2024"
-    homepage = "https://github.com/mcu-rust/FreeRTOS/freertos-cargo-build"
+    homepage = "https://github.com/mcu-rust/FreeRTOS/tree/main/freertos-cargo-build"
     license = "MIT"
     name = "freertos-build"
     readme = "README.md"
-    version = "0.4.1"
+    version = "0.4.2"
 
 [lib]
 
