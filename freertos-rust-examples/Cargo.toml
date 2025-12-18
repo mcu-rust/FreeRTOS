@@ -14,9 +14,7 @@ Create to use FreeRTOS in rust projects. It contains binaries for demos on some 
 [target.thumbv7m-none-eabi.dependencies]
     cortex-m = "0.7"
     cortex-m-rt = "0.7"
-    freertos-next = { path = "../freertos-rust", features = [
-        "critical_section_impl",
-    ] }
+    freertos-next = { path = "../freertos-rust", features = ["standard"] }
     stm32f1xx-hal = { version = "0.10", features = [
         "rt",
         "stm32f103",
@@ -28,29 +26,23 @@ Create to use FreeRTOS in rust projects. It contains binaries for demos on some 
     cortex-m = "0.7"
     cortex-m-rt = "0.7"
     embedded-hal = "1.0"
-    freertos-next = { path = "../freertos-rust" }
+    freertos-next = { path = "../freertos-rust", features = ["hooks"] }
     stm32f4xx-hal = { version = "0.22", features = ["stm32f411"] }
 
 # Example: nrf9160
 [target."thumbv8m.main-none-eabihf".dependencies]
     cortex-m = "0.7"
     cortex-m-rt = "0.7"
-    freertos-next = { path = "../freertos-rust", features = [
-        "critical_section_impl",
-    ] }
+    freertos-next = { path = "../freertos-rust", features = ["standard"] }
     nrf9160-pac = { version = "0.12", features = ["rt"] }
 
 # Example: win
 [target.x86_64-pc-windows-msvc.dependencies]
-    freertos-next = { path = "../freertos-rust", features = [
-        "critical_section_impl",
-    ] }
+    freertos-next = { path = "../freertos-rust", features = ["standard"] }
 
 # Example: linux
 [target.x86_64-unknown-linux-gnu.dependencies]
-    freertos-next = { path = "../freertos-rust", features = [
-        "critical_section_impl",
-    ] }
+    freertos-next = { path = "../freertos-rust", features = ["standard"] }
 
 [build-dependencies]
     freertos-build = { path = "../freertos-cargo-build" }

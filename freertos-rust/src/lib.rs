@@ -81,6 +81,7 @@ mod event_group;
 mod isr;
 #[cfg(feature = "sync")]
 mod mutex;
+#[cfg(cortex_m)]
 mod os_traits_impls;
 #[cfg(feature = "sync")]
 mod queue;
@@ -117,6 +118,8 @@ pub use crate::hooks::*;
 pub use crate::isr::*;
 #[cfg(feature = "sync")]
 pub use crate::mutex::*;
+#[cfg(cortex_m)]
+pub use crate::os_traits_impls::*;
 #[cfg(feature = "sync")]
 pub use crate::queue::*;
 #[cfg(feature = "sync")]
@@ -127,8 +130,6 @@ pub use crate::task::*;
 pub use crate::timers::*;
 #[cfg(any(feature = "time", feature = "sync"))]
 pub use crate::units::*;
-
-pub use crate::os_traits_impls::*;
 #[cfg(feature = "cpu_clock")]
 pub use crate::utils::cpu_clock_hz;
 pub use crate::utils::shim_sanity_check;

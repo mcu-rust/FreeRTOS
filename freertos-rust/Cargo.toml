@@ -10,7 +10,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     links = "freertos"
     name = "freertos-next"
     readme = "README.md"
-    version = "0.7.1"
+    version = "0.7.2"
 
 
 [lib]
@@ -18,7 +18,10 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     path = "src/lib.rs"
 
 [features]
-    default = ["allocator", "sync", "time", "hooks", "interrupt", "delete_task"]
+    default = ["minimum"]
+
+    minimum = ["allocator", "sync", "time"]
+    standard = ["minimum", "hooks", "delete_task", "critical_section_impl"]
 
     allocator = []
     cpu_clock = []
@@ -27,7 +30,6 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     delete_task = []
     hooks = []
     interrupt = []
-    std = ["critical-section/std"]
     sync = ["interrupt"]
     time = ["interrupt"]
 
