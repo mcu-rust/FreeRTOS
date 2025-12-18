@@ -13,13 +13,14 @@ fn main() {
         println!("cargo:rustc-cfg=feature=\"cpu_clock\"");
     }
 
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    println!(
+        "cargo:KERNEL={}",
+        manifest_dir.join("FreeRTOS-Kernel").to_str().unwrap()
+    );
     println!(
         "cargo:SHIM={}",
-        PathBuf::from(manifest_dir)
-            .join("src/freertos")
-            .to_str()
-            .unwrap()
+        manifest_dir.join("src/freertos").to_str().unwrap()
     );
 
     let feature_define_map = HashMap::from([

@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 /// The Kernel can be found at Github: https://github.com/FreeRTOS/FreeRTOS-Kernel
 ///
 /// When not set, you can use the Builder to specify the path
-const ENV_KEY_FREERTOS_SRC: &str = "FREERTOS_SRC";
+const ENV_KEY_FREERTOS_SRC: &str = "DEP_FREERTOS_KERNEL";
 
 /// The FREERTOS_CONFIG variable must point to the directory
 /// where the FreeRTOSConfig.h file is located for the current project.
@@ -33,6 +33,7 @@ pub struct Builder {
     cc: Build,
 }
 
+#[derive(Debug)]
 pub struct Error {
     /// More explanation of error that occurred.
     message: String,

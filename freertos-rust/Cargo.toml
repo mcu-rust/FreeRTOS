@@ -4,13 +4,13 @@
 The freertos-build crate can be used to build and link FreeRTOS from source inside build.rs."""
     documentation = "https://docs.rs/freertos-next"
     edition = "2024"
+    homepage = "https://github.com/mcu-rust/FreeRTOS/freertos-rust"
     keywords = ["FreeRTOS", "RTOS", "embedded", "MCU"]
     license = "MIT"
     links = "freertos"
     name = "freertos-next"
     readme = "README.md"
-    repository = "https://github.com/mcu-rust/FreeRTOS"
-    version = "0.6.1"
+    version = "0.7.0"
 
 
 [lib]

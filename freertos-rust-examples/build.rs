@@ -13,8 +13,6 @@ fn main() {
 
     let mut b = freertos_build::Builder::new();
 
-    b.freertos("FreeRTOS-Kernel/");
-
     // Windows example specific stuff.
     if target_family == "windows" {
         b.freertos_config("examples/win");
@@ -60,7 +58,7 @@ fn main() {
         .unwrap();
     }
 
-    b.compile().unwrap_or_else(|e| panic!("{}", e));
+    b.compile().unwrap();
 }
 
 /// Print relevant environment variables.
