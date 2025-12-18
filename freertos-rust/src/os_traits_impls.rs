@@ -316,15 +316,16 @@ mod sys_tick_timeout {
 
         fn add(sys_tick: u32, count: u32, tick: u64) -> (u32, u32) {
             let reload = (SYST::get_reload() + 1) as u64;
-            let mut diff_count = tick / reload;
+            let diff_count = tick / reload;
             let diff_sys_tick = (tick - diff_count * reload) as u32;
+            let mut diff_count = diff_count as u32;
             let new_sys_tick = if diff_sys_tick > sys_tick {
                 diff_count += 1;
                 sys_tick + reload as u32 - diff_sys_tick
             } else {
                 sys_tick - diff_sys_tick
             };
-            (new_sys_tick, count.wrapping_add(diff_count as u32))
+            (new_sys_tick, count.wrapping_add(diff_count))
         }
     }
 
@@ -332,7 +333,8 @@ mod sys_tick_timeout {
         /// Can be reused without calling `restart()`.
         fn timeout(&mut self) -> bool {
             let (sys_tick, count) = Self::now();
-            if count > self.count || (count == self.count && sys_tick < self.sys_tick) {
+            let diff = (count as i32).wrapping_sub(self.count as i32);
+            if diff > 1 || (diff == 0 && sys_tick < self.sys_tick) {
                 (self.sys_tick, self.count) =
                     Self::add(self.sys_tick, self.count, self.timeout_tick);
                 true
