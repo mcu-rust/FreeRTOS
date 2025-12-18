@@ -375,6 +375,7 @@ fn add_include_with_rerun<P: AsRef<Path>>(build: &mut Build, dir: P) {
 fn setup_all_define(cc: &mut cc::Build) {
     sync_define(cc, "INCLUDE_vTaskDelete");
     sync_define(cc, "INCLUDE_vTaskDelayUntil");
+    sync_define(cc, "INCLUDE_uxTaskGetStackHighWaterMark");
     cc.define("INCLUDE_vTaskDelay", "1");
 }
 

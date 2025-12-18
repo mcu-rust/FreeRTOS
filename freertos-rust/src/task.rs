@@ -303,6 +303,7 @@ impl Task {
         }
     }
 
+    #[cfg(feature = "stack_high_water")]
     /// Get the minimum amount of stack that was ever left on this task.
     pub fn get_stack_high_water_mark(&self) -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(self.task_handle) as u32 }
@@ -346,6 +347,7 @@ impl CurrentTask {
         unsafe { freertos_rs_task_notify_take(if clear { 1 } else { 0 }, wait_for.to_ticks()) }
     }
 
+    #[cfg(feature = "stack_high_water")]
     /// Get the minimum amount of stack that was ever left on the current task.
     pub fn get_stack_high_water_mark() -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(0 as FreeRtosTaskHandle) as u32 }

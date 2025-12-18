@@ -133,18 +133,17 @@ extern void vAssertCalled(const char *file, int linenum);
  * to exclude the API function.  NOTE:  Setting an INCLUDE_ parameter to 0 is
  * only necessary if the linker does not automatically remove functions that are
  * not referenced anyway. */
-#define INCLUDE_vTaskPrioritySet            1
-#define INCLUDE_uxTaskPriorityGet           1
-#define INCLUDE_vTaskCleanUpResources       0
-#define INCLUDE_vTaskSuspend                1
-#define INCLUDE_uxTaskGetStackHighWaterMark 0
-#define INCLUDE_xTaskGetIdleTaskHandle      0
-#define INCLUDE_eTaskGetState               1
-#define INCLUDE_xTaskResumeFromISR          0
-#define INCLUDE_xTaskGetCurrentTaskHandle   1
-#define INCLUDE_xTaskGetSchedulerState      0
-#define INCLUDE_xSemaphoreGetMutexHolder    0
-#define INCLUDE_xTimerPendFunctionCall      1
+#define INCLUDE_vTaskPrioritySet          1
+#define INCLUDE_uxTaskPriorityGet         1
+#define INCLUDE_vTaskCleanUpResources     0
+#define INCLUDE_vTaskSuspend              1
+#define INCLUDE_xTaskGetIdleTaskHandle    0
+#define INCLUDE_eTaskGetState             1
+#define INCLUDE_xTaskResumeFromISR        0
+#define INCLUDE_xTaskGetCurrentTaskHandle 1
+#define INCLUDE_xTaskGetSchedulerState    0
+#define INCLUDE_xSemaphoreGetMutexHolder  0
+#define INCLUDE_xTimerPendFunctionCall    1
 
 /* This demo makes use of one or more example stats formatting functions.  These
  * format the raw data provided by the uxTaskGetSystemState() function in to

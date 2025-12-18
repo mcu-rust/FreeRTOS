@@ -26,6 +26,7 @@ fn main() {
     let feature_define_map = HashMap::from([
         ("delete_task", "INCLUDE_vTaskDelete"),
         ("delay_until", "INCLUDE_vTaskDelayUntil"),
+        ("stack_high_water", "INCLUDE_uxTaskGetStackHighWaterMark"),
     ]);
 
     for (ft, def) in feature_define_map.iter() {

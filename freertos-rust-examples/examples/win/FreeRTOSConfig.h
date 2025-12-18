@@ -101,7 +101,6 @@ functions anyway. */
 #define INCLUDE_uxTaskPriorityGet              1
 #define INCLUDE_vTaskCleanUpResources          0
 #define INCLUDE_vTaskSuspend                   1
-#define INCLUDE_uxTaskGetStackHighWaterMark    1
 #define INCLUDE_xTaskGetSchedulerState         1
 #define INCLUDE_xTimerGetTimerDaemonTaskHandle 1
 #define INCLUDE_xTaskGetIdleTaskHandle         1

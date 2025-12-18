@@ -149,12 +149,11 @@ extern void set_PA0_dbgOut(bool onOff);
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
 
-#define INCLUDE_vTaskPrioritySet            1
-#define INCLUDE_uxTaskPriorityGet           1
-#define INCLUDE_vTaskCleanUpResources       0
-#define INCLUDE_vTaskSuspend                1
-#define INCLUDE_uxTaskGetStackHighWaterMark 1
-#define INCLUDE_eTaskGetState               1
+#define INCLUDE_vTaskPrioritySet      1
+#define INCLUDE_uxTaskPriorityGet     1
+#define INCLUDE_vTaskCleanUpResources 0
+#define INCLUDE_vTaskSuspend          1
+#define INCLUDE_eTaskGetState         1
 
 /* Use the system definition, if there is one */
 // #ifdef __NVIC_PRIO_BITS
