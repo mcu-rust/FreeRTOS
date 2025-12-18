@@ -10,7 +10,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     links = "freertos"
     name = "freertos-next"
     readme = "README.md"
-    version = "0.7.4"
+    version = "0.7.5"
 
 
 [lib]
@@ -34,6 +34,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     critical_section_impl = ["critical-section/restore-state-u32"]
     delay_until = []
     delete_task = []
+    heap_free_size = ["allocator"]
     hooks = []
     interrupt = []
     stack_high_water = []

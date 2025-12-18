@@ -376,6 +376,7 @@ fn setup_all_define(cc: &mut cc::Build) {
     sync_define(cc, "INCLUDE_vTaskDelete");
     sync_define(cc, "INCLUDE_vTaskDelayUntil");
     sync_define(cc, "INCLUDE_uxTaskGetStackHighWaterMark");
+    sync_define(cc, "INCLUDE_HeapFreeSize");
     cc.define("INCLUDE_vTaskDelay", "1");
 }
 

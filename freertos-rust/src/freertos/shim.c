@@ -478,3 +478,17 @@ EventBits_t freertos_rs_event_group_sync(EventGroupHandle_t event_group, const E
                                          const EventBits_t bits_to_wait_for, TickType_t ticks_to_wait) {
     return xEventGroupSync(event_group, bits_to_set, bits_to_wait_for, ticks_to_wait);
 }
+
+#if (INCLUDE_HeapFreeSize == 1)
+size_t freertos_rs_get_free_heap_size() {
+    return xPortGetFreeHeapSize();
+}
+
+size_t freertos_rs_get_minimum_free_heap_size() {
+    return xPortGetMinimumEverFreeHeapSize();
+}
+
+void freertos_rs_reset_minimum_free_heap_size() {
+    xPortResetHeapMinimumEverFreeHeapSize();
+}
+#endif

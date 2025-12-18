@@ -303,10 +303,18 @@ impl Task {
         }
     }
 
+    /// Get the minimum amount of stack that was ever left on this task in words.
     #[cfg(feature = "stack_high_water")]
-    /// Get the minimum amount of stack that was ever left on this task.
+    #[inline]
     pub fn get_stack_high_water_mark(&self) -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(self.task_handle) as u32 }
+    }
+
+    /// Get the minimum amount of stack that was ever left on this task in bytes.
+    #[cfg(feature = "stack_high_water")]
+    #[inline]
+    pub fn get_stack_high_water_mark_bytes(&self) -> u32 {
+        self.get_stack_high_water_mark() * 4
     }
 
     pub fn get_id(&self) -> Result<FreeRtosBaseType, FreeRtosError> {
@@ -347,10 +355,18 @@ impl CurrentTask {
         unsafe { freertos_rs_task_notify_take(if clear { 1 } else { 0 }, wait_for.to_ticks()) }
     }
 
-    #[cfg(feature = "stack_high_water")]
     /// Get the minimum amount of stack that was ever left on the current task.
+    #[cfg(feature = "stack_high_water")]
+    #[inline]
     pub fn get_stack_high_water_mark() -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(0 as FreeRtosTaskHandle) as u32 }
+    }
+
+    /// Get the minimum amount of stack that was ever left on this task in bytes.
+    #[cfg(feature = "stack_high_water")]
+    #[inline]
+    pub fn get_stack_high_water_mark_bytes() -> u32 {
+        Self::get_stack_high_water_mark() * 4
     }
 }
 

@@ -27,6 +27,7 @@ fn main() {
         ("delete_task", "INCLUDE_vTaskDelete"),
         ("delay_until", "INCLUDE_vTaskDelayUntil"),
         ("stack_high_water", "INCLUDE_uxTaskGetStackHighWaterMark"),
+        ("heap_free_size", "INCLUDE_HeapFreeSize"),
     ]);
 
     for (ft, def) in feature_define_map.iter() {

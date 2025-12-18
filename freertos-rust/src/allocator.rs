@@ -11,6 +11,21 @@ Use with:
 
 pub struct FreeRtosAllocator;
 
+#[cfg(feature = "heap_free_size")]
+impl FreeRtosAllocator {
+    pub fn get_free_size(&self) -> usize {
+        unsafe { freertos_rs_get_free_heap_size() }
+    }
+
+    pub fn get_min_free_size(&self) -> usize {
+        unsafe { freertos_rs_get_minimum_free_heap_size() }
+    }
+
+    pub fn reset_min_free_size(&self) {
+        unsafe { freertos_rs_reset_minimum_free_heap_size() }
+    }
+}
+
 unsafe impl GlobalAlloc for FreeRtosAllocator {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let res = unsafe { freertos_rs_pvPortMalloc(layout.size() as u32) };

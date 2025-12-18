@@ -198,4 +198,8 @@ unsafe extern "C" {
         bits_to_wait_for: FreeRtosEventBitsType,
         ticks_to_wait: FreeRtosTickType,
     ) -> FreeRtosEventBitsType;
+
+    pub fn freertos_rs_get_free_heap_size() -> usize;
+    pub fn freertos_rs_get_minimum_free_heap_size() -> usize;
+    pub fn freertos_rs_reset_minimum_free_heap_size();
 }
