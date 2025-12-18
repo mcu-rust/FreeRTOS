@@ -132,4 +132,4 @@ pub use crate::timers::*;
 pub use crate::units::*;
 #[cfg(feature = "cpu_clock")]
 pub use crate::utils::cpu_clock_hz;
-pub use crate::utils::shim_sanity_check;
+pub use crate::utils::{shim_sanity_check, str_from_c_string};

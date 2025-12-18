@@ -55,7 +55,6 @@ pub fn shim_sanity_check() -> Result<(), TypeSizeError> {
 /// # Safety
 ///
 /// `str` must be a pointer to the beginning of nul-terminated sequence of bytes.
-#[cfg(any(feature = "time", feature = "hooks", feature = "sync"))]
 pub unsafe fn str_from_c_string<'a>(str: *const u8) -> Result<&'a str, FreeRtosError> {
     match unsafe { CStr::from_ptr(str as *const _).to_str() } {
         Ok(s) => Ok(s),
