@@ -2,11 +2,9 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use cortex_m::asm;
-use cortex_m_rt::exception;
-use cortex_m_rt::{ExceptionFrame, entry};
+use cortex_m_rt::{ExceptionFrame, entry, exception};
 use freertos_next::*;
-use stm32f1xx_hal::{gpio::PinState, pac, prelude::*};
+use stm32f1_hal::{cortex_m::asm, gpio::PinState, pac, prelude::*, rcc};
 
 #[global_allocator]
 static GLOBAL: FreeRtosAllocator = FreeRtosAllocator;
@@ -25,18 +23,18 @@ fn main() -> ! {
 
 fn app_main() -> ! {
     let dp = pac::Peripherals::take().unwrap();
-    let mut flash = dp.FLASH.constrain();
-    let rcc = dp.RCC.constrain();
-    let _clocks = rcc
-        .cfgr
-        .use_hse(8.MHz())
-        .sysclk(72.MHz())
-        .freeze(&mut flash.acr);
+    let mut flash = dp.FLASH.init();
+    let sysclk = 72.MHz();
+    let mut rcc = dp
+        .RCC
+        .init()
+        .freeze(rcc::Config::hse(8.MHz()).sysclk(sysclk), &mut flash.acr);
+    assert_eq!(rcc.clocks().sysclk(), sysclk);
 
-    let mut gpio = dp.GPIOB.split();
-    let mut led = gpio
+    let mut gpiob = dp.GPIOB.split(&mut rcc);
+    let mut led = gpiob
         .pb0
-        .into_open_drain_output_with_state(&mut gpio.crl, PinState::High);
+        .into_open_drain_output_with_state(&mut gpiob.crl, PinState::High);
 
     loop {
         CurrentTask::delay(Duration::ms(500));
