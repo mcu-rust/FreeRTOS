@@ -1,4 +1,4 @@
-# FreeRTOS-Next
+# FreeRTOS
 
 [![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
 

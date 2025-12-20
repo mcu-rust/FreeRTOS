@@ -1,12 +1,12 @@
-# FreeRTOS-Next
+# FreeRTOS Workspace
 [![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
 
 This project is based on code from [freertos.rs](https://github.com/hashmismatch/freertos.rs) and [FreeRTOS-rust](https://github.com/lobaro/FreeRTOS-rust) and some additions to
  simplify the usage of [FreeRTOS](https://github.com/FreeRTOS/FreeRTOS-Kernel) in embedded applications written in Rust.
 
-Project Crates:
-- [freertos-next](freertos-rust) The runtime dependency for you FreeRTOS Rust application.
-- [freertos-build](freertos-cargo-build) A tool to build the FreeRTOS-Kernel.
+Crate projects:
+- [freertos](freertos) The runtime dependency for you FreeRTOS Rust application.
+- [freertos-build](freertos-build) A tool to build the FreeRTOS-Kernel.
 
 ## How it works
 

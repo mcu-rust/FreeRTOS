@@ -5,7 +5,7 @@
 
 Helper crate for building FreeRTOS applications with Cargo and Rust using a `build.rs`.
 
-See also [freertos-next README](https://crates.io/crates/freertos-next/freertos-rust/README.md).
+See also [freertos README](https://crates.io/crates/freertos-next/freertos-rust/README.md).
 
 ## Usage
 
