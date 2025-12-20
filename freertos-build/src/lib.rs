@@ -1,8 +1,7 @@
 use cc::Build;
+use std::env;
 use std::ffi::OsStr;
-use std::fmt::Display;
 use std::path::{Path, PathBuf};
-use std::{env, fmt};
 use walkdir::WalkDir;
 
 /// The FREERTOS_SRC env variable must point to the FreeRTOS kernel code.
@@ -34,22 +33,14 @@ pub struct Builder {
 }
 
 #[derive(Debug)]
-pub struct Error {
+pub enum Error {
     /// More explanation of error that occurred.
-    message: String,
+    Message(String),
 }
 
 impl Error {
-    fn new(message: &str) -> Error {
-        Error {
-            message: message.to_owned(),
-        }
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.message)
+    fn new(message: &str) -> Self {
+        Self::Message(message.to_owned())
     }
 }
 
@@ -393,20 +384,3 @@ fn test_paths() {
     let b = Builder::new();
     assert_eq!(b.freertos_dir.to_str().unwrap(), "some/path");
 }
-/*
-#[test]
-fn test_compile() {
-    env::set_var("FREERTOS_SRC", "C:\\dev\\projects\\FreeRTOS\\FreeRTOS\\Source");
-    env::set_var("TARGET", "thumbv8m.main-none-eabihf");
-    env::set_var("OUT_DIR", "out");
-    env::set_var("OPT_LEVEL", "0");
-    env::set_var("HOST", "x86_64-pc-windows-gnu");
-    let mut b = Builder::new();
-
-    let res = b.compile();
-
-    if res.is_err() {
-        panic!(res.err().unwrap().message)
-    }
-    assert!(res.is_ok())
-}*/
