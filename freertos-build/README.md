@@ -3,9 +3,9 @@
 [![Crates.io](https://img.shields.io/crates/v/freertos-build.svg)](https://crates.io/crates/freertos-build)
 
 
-Helper crate for building FreeRTOS applications with Cargo and Rust using a `build.rs`.
+Helper crate for [freertos-next](https://crates.io/crates/freertos-next) by building FreeRTOS applications with Cargo and Rust using a `build.rs`.
 
-See also [freertos README](https://crates.io/crates/freertos-next/freertos-rust/README.md).
+See also [freertos README](https://github.com/mcu-rust/FreeRTOS/tree/main/freertos).
 
 ## Usage
 

@@ -17,13 +17,6 @@ Install required/useful tooling
     cargo install cargo-binutils
     rustup component add llvm-tools-preview
 
-### Checkout
-
-The FreeRTOS Kernel source is a submodule of this repo, referencing the official FreeRTOS-Kernel distribution.
-Currently tagged at [v11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/tag/V11.2.0).
-To checkout the submodule with the kernel sources:
-
-    git submodule update --init --recursive
 
 ### Build
 

@@ -11,6 +11,8 @@ Wrapper library to use FreeRTOS API in Rust.
   - [critical-section](https://crates.io/crates/critical-section).
   - [mutex-traits](https://crates.io/crates/mutex-traits).
 
+It's named **freertos-next** on crates.io right now, because we can't choose a shorter name.
+
 ## Usage
 
 1. Add dependencies to your Rust APP
