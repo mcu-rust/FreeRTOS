@@ -82,7 +82,7 @@ mod isr;
 #[cfg(feature = "sync")]
 mod mutex;
 #[cfg(cortex_m)]
-mod os_traits_impls;
+mod os_trait_impls;
 #[cfg(feature = "sync")]
 mod queue;
 #[cfg(feature = "sync")]
@@ -119,7 +119,7 @@ pub use crate::isr::*;
 #[cfg(feature = "sync")]
 pub use crate::mutex::*;
 #[cfg(cortex_m)]
-pub use crate::os_traits_impls::*;
+pub use crate::os_trait_impls::*;
 #[cfg(feature = "sync")]
 pub use crate::queue::*;
 #[cfg(feature = "sync")]
