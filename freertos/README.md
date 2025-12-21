@@ -1,8 +1,9 @@
 # FreeRTOS
-
+[![CI](https://github.com/mcu-rust/freertos/workflows/CI/badge.svg)](https://github.com/mcu-rust/freertosactions)
 [![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
-[![Downloads](https://img.shields.io/crates/d/freertos-next.svg)](https://crates.io/crates/freertos-next)
 [![Docs.rs](https://docs.rs/freertos-next/badge.svg)](https://docs.rs/freertos-next)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](./LICENSE)
+[![Downloads](https://img.shields.io/crates/d/freertos-next.svg)](https://crates.io/crates/freertos-next)
 
 `freertos-next` is a Rust wrapper for the FreeRTOS API.
 
