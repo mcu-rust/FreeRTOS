@@ -1,5 +1,5 @@
 # FreeRTOS
-[![CI](https://github.com/mcu-rust/freertos/workflows/CI/badge.svg)](https://github.com/mcu-rust/freertosactions)
+[![CI](https://github.com/mcu-rust/freertos/workflows/CI/badge.svg)](https://github.com/mcu-rust/freertos/actions)
 [![Crates.io](https://img.shields.io/crates/v/freertos-next.svg)](https://crates.io/crates/freertos-next)
 [![Docs.rs](https://docs.rs/freertos-next/badge.svg)](https://docs.rs/freertos-next)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](./LICENSE)
@@ -8,7 +8,7 @@
 `freertos-next` is a Rust wrapper for the FreeRTOS API.
 
 - It bundles the official [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel) sources (currently `V11.2.0`).  
-  If you need a customized setup, you can supply your own kernel tree and call `b.freertos("path/to/your/kernel");` in your `build.rs`.
+  If you need a customized setup, you can prepare your own kernel source files and call `b.freertos("path/to/your/kernel");` in your `build.rs`.
 - It implements several traits to ensure smooth integration with embedded projects:
   - [`os-trait`](https://crates.io/crates/os-trait)
   - [`critical-section`](https://crates.io/crates/critical-section)
