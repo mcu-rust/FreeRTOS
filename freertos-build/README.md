@@ -1,6 +1,6 @@
 # freertos-build
 
-[![CI](https://github.com/mcu-rust/freertos-build/workflows/CI/badge.svg)](https://github.com/mcu-rust/freertos-build/actions)
+[![CI](https://github.com/mcu-rust/freertos/workflows/CI/badge.svg)](https://github.com/mcu-rust/freertosactions)
 [![Crates.io](https://img.shields.io/crates/v/freertos-build.svg)](https://crates.io/crates/freertos-build)
 [![Docs.rs](https://docs.rs/freertos-build/badge.svg)](https://docs.rs/freertos-build)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](./LICENSE)
