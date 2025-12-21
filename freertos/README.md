@@ -8,7 +8,7 @@
 
 - It bundles the official [FreeRTOS-Kernel](https://github.com/FreeRTOS/FreeRTOS-Kernel) sources (currently `V11.2.0`).  
   If you need a customized setup, you can supply your own kernel tree and call `b.freertos("path/to/your/kernel");` in your `build.rs`.
-- It implements several traits to ensure smooth integration with Rust tooling:
+- It implements several traits to ensure smooth integration with embedded projects:
   - [`os-trait`](https://crates.io/crates/os-trait)
   - [`critical-section`](https://crates.io/crates/critical-section)
   - [`mutex-traits`](https://crates.io/crates/mutex-traits)
