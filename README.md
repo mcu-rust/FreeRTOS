@@ -21,16 +21,22 @@ info provided by your apps `build.rs`: A path to the app specific `FreeRTOSConfi
 See [freertos README](freertos/README.md)
 
 ## Examples
-To get started there are examples in [freertos-rust-examples](freertos-rust-examples) for:
+[stm32f1-FreeRTOS-example](https://github.com/mcu-rust/stm32f1-FreeRTOS-example) is a more complete example for STM32F1.
+
+And there are some simple examples in [freertos-rust-examples](freertos-rust-examples) for:
 
 * Cortex M33 (nRF9160)
 * Cortex M3 (STM32F103C8)
 * Cortex M4 (STM32F411CE)
 * Windows
-* ...more to come...
+* Linux
 
 
 # License
 This repository is using the MIT License. Some parts might state different licenses that need to be respected when used.
 
 * The [Linux port](https://github.com/michaelbecker/freertos-addons) is licensed under GPLv2
+
+## 🔖 Keywords
+
+freertos · rtos · rust · embedded · embedded-hal · no-std · scheduler · multitasking · bindings · wrapper
