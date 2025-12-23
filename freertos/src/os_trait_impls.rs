@@ -19,7 +19,7 @@ where
     type NotifyWaiter = N::Waiter;
     type Timeout = FreeRtosTimeoutNs;
     type TimeoutState = FreeRtosTimeoutState;
-    type Delay = FreeRtosTickDelayNs;
+    type Delay = FreeRtosDelayNs;
 
     const O: Self = Self { _n: PhantomData };
 
@@ -35,7 +35,7 @@ where
 
     #[inline]
     fn delay() -> Self::Delay {
-        FreeRtosTickDelayNs::new()
+        FreeRtosDelayNs::new()
     }
 
     #[inline]
@@ -193,15 +193,15 @@ impl NotifyWaiter for SemaphoreNotifyWaiter {
 
 /// `DelayNs` implementation
 #[derive(Default)]
-pub struct FreeRtosTickDelayNs {}
+pub struct FreeRtosDelayNs {}
 
-impl FreeRtosTickDelayNs {
+impl FreeRtosDelayNs {
     pub const fn new() -> Self {
         Self {}
     }
 }
 
-impl DelayNs for FreeRtosTickDelayNs {
+impl DelayNs for FreeRtosDelayNs {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
         let mut t = FreeRtosTimeoutNs::new().start_ns(ns);
