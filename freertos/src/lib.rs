@@ -63,9 +63,9 @@
 #[cfg_attr(any(feature = "time", feature = "sync"), macro_use)]
 extern crate alloc;
 
+mod base_type;
 #[cfg(feature = "hooks")]
 mod hooks;
-mod prelude;
 mod shim;
 
 #[cfg(feature = "allocator")]

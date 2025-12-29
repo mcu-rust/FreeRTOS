@@ -1,5 +1,5 @@
 use crate::base::*;
-use crate::prelude::v1::*;
+use crate::base_type::v1::*;
 use crate::shim::*;
 
 use core::ffi::CStr;

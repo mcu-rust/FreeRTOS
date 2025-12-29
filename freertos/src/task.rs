@@ -1,6 +1,6 @@
 use crate::base::*;
 use crate::isr::*;
-use crate::prelude::v1::*;
+use crate::base_type::v1::*;
 use crate::shim::*;
 use crate::units::*;
 use crate::utils::*;
