@@ -1,6 +1,6 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
-use os_trait::{FakeRawMutex, MicrosDurationU32, prelude::*};
+use os_trait::{Duration as OsDuration, FakeRawMutex, TickTimeout, prelude::*};
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
 pub struct FreeRTOS<N> {
@@ -12,13 +12,12 @@ unsafe impl<N> Sync for FreeRTOS<N> {}
 
 impl<N> OsInterface for FreeRTOS<N>
 where
-    N: NotifyBuilder + 'static,
+    N: NotifyBuilder,
 {
     type RawMutex = FakeRawMutex;
     type Notifier = N::Notifier;
     type NotifyWaiter = N::Waiter;
-    type Timeout = FreeRtosTimeoutNs;
-    type TimeoutState = FreeRtosTimeoutState;
+    type Instant = FreeRtosInstant;
     type Delay = FreeRtosDelayNs;
 
     const O: Self = Self { _n: PhantomData };
@@ -26,11 +25,6 @@ where
     #[inline]
     fn yield_thread() {
         CurrentTask::yield_now();
-    }
-
-    #[inline]
-    fn timeout() -> Self::Timeout {
-        FreeRtosTimeoutNs::new()
     }
 
     #[inline]
@@ -44,9 +38,9 @@ where
     }
 }
 
-pub trait NotifyBuilder {
+pub trait NotifyBuilder: Sized + 'static {
     type Notifier: Notifier;
-    type Waiter: NotifyWaiter;
+    type Waiter: NotifyWaiter<FreeRTOS<Self>>;
 
     fn build() -> (Self::Notifier, Self::Waiter);
 }
@@ -113,8 +107,8 @@ impl TaskNotifyWaiter {
 
 unsafe impl Send for TaskNotifyWaiter {}
 
-impl NotifyWaiter for TaskNotifyWaiter {
-    fn wait(&self, timeout: MicrosDurationU32) -> bool {
+impl<OS: OsInterface> NotifyWaiter<OS> for TaskNotifyWaiter {
+    fn wait(&self, timeout: &OsDuration<OS>) -> bool {
         let inner = self.get_inner();
 
         if let Ok(task) = Task::current() {
@@ -131,7 +125,7 @@ impl NotifyWaiter for TaskNotifyWaiter {
             return false;
         }
 
-        let dur = Duration::ms(timeout.to_millis());
+        let dur = Duration::ms(timeout.as_millis());
         if let Ok(val) = inner.wait_for_notification(0, u32::MAX, dur) {
             return val != 0;
         }
@@ -181,9 +175,9 @@ pub struct SemaphoreNotifyWaiter {
 
 unsafe impl Send for SemaphoreNotifyWaiter {}
 
-impl NotifyWaiter for SemaphoreNotifyWaiter {
-    fn wait(&self, timeout: MicrosDurationU32) -> bool {
-        let mut t = timeout.to_millis();
+impl<OS: OsInterface> NotifyWaiter<OS> for SemaphoreNotifyWaiter {
+    fn wait(&self, timeout: &OsDuration<OS>) -> bool {
+        let mut t = timeout.as_millis();
         if t == 0 {
             t = 1;
         }
@@ -204,13 +198,13 @@ impl FreeRtosDelayNs {
 impl DelayNs for FreeRtosDelayNs {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
-        let mut t = FreeRtosTimeoutNs::new().start_ns(ns);
+        let mut t = TickTimeout::<FreeRtosInstant>::from_nanos(ns);
         while !t.timeout() {}
     }
 
     #[inline]
     fn delay_us(&mut self, us: u32) {
-        let mut t = FreeRtosTimeoutNs::new().start_us(us);
+        let mut t = TickTimeout::<FreeRtosInstant>::from_micros(us);
         while !t.timeout() {
             CurrentTask::yield_now();
         }
@@ -222,34 +216,6 @@ impl DelayNs for FreeRtosDelayNs {
     }
 }
 
-#[derive(Default)]
-pub struct FreeRtosTimeoutNs {}
-
-impl FreeRtosTimeoutNs {
-    pub const fn new() -> Self {
-        Self {}
-    }
-}
-
-impl TimeoutNs for FreeRtosTimeoutNs {
-    type TimeoutState = FreeRtosTimeoutState;
-
-    #[inline]
-    fn start_ns(&self, timeout: u32) -> Self::TimeoutState {
-        Self::TimeoutState::new_ns(timeout)
-    }
-
-    #[inline]
-    fn start_us(&self, timeout: u32) -> Self::TimeoutState {
-        Self::TimeoutState::new_us(timeout)
-    }
-
-    #[inline]
-    fn start_ms(&self, timeout: u32) -> Self::TimeoutState {
-        Self::TimeoutState::new_ms(timeout)
-    }
-}
-
 #[cfg(cortex_m)]
 pub use sys_tick_timeout::*;
 #[cfg(cortex_m)]
@@ -257,50 +223,21 @@ mod sys_tick_timeout {
     use super::*;
     use core::sync::atomic::{Ordering, compiler_fence};
     use cortex_m::peripheral::SYST;
+    use os_trait::{KilohertzU32, TickDuration};
 
-    #[derive(Clone, Copy)]
-    pub struct FreeRtosTimeoutState {
+    #[derive(Clone)]
+    pub struct FreeRtosInstant {
         sys_tick: u32,
         count: u32,
-        timeout_tick: u64,
     }
 
-    impl FreeRtosTimeoutState {
-        pub fn new_ns(timeout: u32) -> Self {
-            let ns = timeout as u64;
-            let timeout_tick = (ns * Self::frequency()).div_ceil(1_000_000);
-            Self::new(timeout_tick)
+    impl FreeRtosInstant {
+        #[inline(always)]
+        fn reload_value() -> u64 {
+            (SYST::get_reload() + 1) as u64
         }
 
-        pub fn new_us(timeout: u32) -> Self {
-            let us = timeout as u64;
-            let timeout_tick = (us * Self::frequency()).div_ceil(1_000);
-            Self::new(timeout_tick)
-        }
-
-        pub fn new_ms(timeout: u32) -> Self {
-            let ms = timeout as u64;
-            let timeout_tick = ms * Self::frequency();
-            Self::new(timeout_tick)
-        }
-
-        #[inline]
-        fn frequency() -> u64 {
-            // to kHz
-            (utils::cpu_clock_hz() / 1000) as u64
-        }
-
-        fn new(timeout_tick: u64) -> Self {
-            let (sys_tick, count) = Self::now();
-            let (sys_tick, count) = Self::add(sys_tick, count, timeout_tick);
-            Self {
-                sys_tick,
-                count,
-                timeout_tick,
-            }
-        }
-
-        fn now() -> (u32, u32) {
+        fn now_tick_count() -> (u32, u32) {
             let count = FreeRtosUtils::get_tick_count();
             let sys_tick = SYST::get_current();
             compiler_fence(Ordering::Acquire);
@@ -315,7 +252,7 @@ mod sys_tick_timeout {
         }
 
         fn add(sys_tick: u32, count: u32, tick: u64) -> (u32, u32) {
-            let reload = (SYST::get_reload() + 1) as u64;
+            let reload = Self::reload_value();
             let diff_count = tick / reload;
             let diff_sys_tick = (tick - diff_count * reload) as u32;
             let mut diff_count = diff_count as u32;
@@ -329,23 +266,29 @@ mod sys_tick_timeout {
         }
     }
 
-    impl TimeoutState for FreeRtosTimeoutState {
-        /// Can be reused without calling `restart()`.
-        fn timeout(&mut self) -> bool {
-            let (sys_tick, count) = Self::now();
-            let diff = (count as i32).wrapping_sub(self.count as i32);
-            if diff > 1 || (diff == 0 && sys_tick < self.sys_tick) {
-                (self.sys_tick, self.count) =
-                    Self::add(self.sys_tick, self.count, self.timeout_tick);
-                true
-            } else {
-                false
-            }
+    impl TickInstant for FreeRtosInstant {
+        #[inline]
+        fn frequency() -> KilohertzU32 {
+            utils::cpu_clock_hz().Hz()
         }
 
-        fn restart(&mut self) {
-            let (sys_tick, count) = Self::now();
-            (self.sys_tick, self.count) = Self::add(sys_tick, count, self.timeout_tick);
+        fn now() -> Self {
+            let (sys_tick, count) = Self::now_tick_count();
+            Self { sys_tick, count }
+        }
+
+        fn elapsed(&mut self) -> TickDuration<Self> {
+            let (sys_tick, count) = Self::now_tick_count();
+            let reload = Self::reload_value();
+            let diff = count.wrapping_sub(self.count) as u64;
+            let t = diff * reload + self.sys_tick as u64 - sys_tick as u64;
+            TickDuration::from_ticks(t)
+        }
+
+        fn move_forward(&mut self, dur: &TickDuration<Self>) {
+            (self.sys_tick, self.count) = Self::add(self.sys_tick, self.count, dur.ticks());
         }
     }
 }
+
+// TODO more implementation
