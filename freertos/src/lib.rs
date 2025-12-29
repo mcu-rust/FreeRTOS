@@ -63,6 +63,8 @@
 #[cfg_attr(any(feature = "time", feature = "sync"), macro_use)]
 extern crate alloc;
 
+pub mod prelude;
+
 mod base_type;
 #[cfg(feature = "hooks")]
 mod hooks;
