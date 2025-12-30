@@ -10,7 +10,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     links = "freertos"
     name = "freertos-next"
     readme = "README.md"
-    version = "0.8.0"
+    version = "0.9.0"
 
 
 [lib]
@@ -44,7 +44,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
 [dependencies]
     critical-section = "1"
     mutex-traits = "1"
-    os-trait = "0.7"
+    os-trait = "0.9"
 
 [target.'cfg(all(target_arch = "arm", target_os = "none", any(target_abi = "eabi", target_abi = "eabihf")))'.dependencies]
     cortex-m = "0.7"

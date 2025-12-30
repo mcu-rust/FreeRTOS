@@ -1,6 +1,9 @@
 use crate::*;
 use core::{cell::UnsafeCell, marker::PhantomData};
-use os_trait::{Duration as OsDuration, FakeRawMutex, TickTimeout, prelude::*};
+use os_trait::{
+    DelayNs, Duration as OsDuration, FakeRawMutex, NotifierInterface, NotifyWaiterInterface,
+    TickInstant, TickTimeout, prelude::*,
+};
 
 /// `OsInterface` implementation, the N can be choose between [`SemaphoreNotifier`]
 pub struct FreeRTOS<N> {
@@ -39,8 +42,8 @@ where
 }
 
 pub trait NotifyBuilder: Sized + 'static {
-    type Notifier: Notifier;
-    type Waiter: NotifyWaiter<FreeRTOS<Self>>;
+    type Notifier: NotifierInterface;
+    type Waiter: NotifyWaiterInterface<FreeRTOS<Self>>;
 
     fn build() -> (Self::Notifier, Self::Waiter);
 }
@@ -76,7 +79,7 @@ impl NotifyBuilder for TaskNotifier {
     }
 }
 
-impl Notifier for TaskNotifier {
+impl NotifierInterface for TaskNotifier {
     fn notify(&self) -> bool {
         let inner = self.get_inner();
         if inner.is_null() {
@@ -107,7 +110,7 @@ impl TaskNotifyWaiter {
 
 unsafe impl Send for TaskNotifyWaiter {}
 
-impl<OS: OsInterface> NotifyWaiter<OS> for TaskNotifyWaiter {
+impl<OS: OsInterface> NotifyWaiterInterface<OS> for TaskNotifyWaiter {
     fn wait(&self, timeout: &OsDuration<OS>) -> bool {
         let inner = self.get_inner();
 
@@ -158,7 +161,7 @@ impl NotifyBuilder for SemaphoreNotifier {
     }
 }
 
-impl Notifier for SemaphoreNotifier {
+impl NotifierInterface for SemaphoreNotifier {
     fn notify(&self) -> bool {
         if is_in_isr() {
             let mut ctx = InterruptContext::new();
@@ -175,7 +178,7 @@ pub struct SemaphoreNotifyWaiter {
 
 unsafe impl Send for SemaphoreNotifyWaiter {}
 
-impl<OS: OsInterface> NotifyWaiter<OS> for SemaphoreNotifyWaiter {
+impl<OS: OsInterface> NotifyWaiterInterface<OS> for SemaphoreNotifyWaiter {
     fn wait(&self, timeout: &OsDuration<OS>) -> bool {
         let mut t = timeout.as_millis();
         if t == 0 {
