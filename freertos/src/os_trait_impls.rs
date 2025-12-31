@@ -201,13 +201,13 @@ impl FreeRtosDelayNs {
 impl DelayNs for FreeRtosDelayNs {
     #[inline]
     fn delay_ns(&mut self, ns: u32) {
-        let mut t = TickTimeout::<FreeRtosInstant>::from_nanos(ns);
+        let mut t = TickTimeout::<FreeRtosInstant>::nanos(ns);
         while !t.timeout() {}
     }
 
     #[inline]
     fn delay_us(&mut self, us: u32) {
-        let mut t = TickTimeout::<FreeRtosInstant>::from_micros(us);
+        let mut t = TickTimeout::<FreeRtosInstant>::micros(us);
         while !t.timeout() {
             CurrentTask::yield_now();
         }
@@ -289,7 +289,7 @@ mod sys_tick_timeout {
         }
 
         fn move_forward(&mut self, dur: &TickDuration<Self>) {
-            (self.sys_tick, self.count) = Self::add(self.sys_tick, self.count, dur.ticks());
+            (self.sys_tick, self.count) = Self::add(self.sys_tick, self.count, dur.as_ticks());
         }
     }
 }

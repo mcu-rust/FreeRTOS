@@ -14,7 +14,7 @@ Create to use FreeRTOS in rust projects. It contains binaries for demos on some 
 [target.thumbv7m-none-eabi.dependencies]
     cortex-m-rt = "0.7"
     freertos-next = { path = "../freertos", features = ["standard"] }
-    stm32f1-hal = { version = "0.9", features = ["f103", "x8"] }
+    stm32f1-hal = { version = "0.10", features = ["f103", "x8"] }
 
 # Example: stm32-cortex-m4-blackpill
 [target.thumbv7em-none-eabihf.dependencies]
