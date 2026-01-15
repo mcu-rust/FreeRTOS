@@ -224,7 +224,6 @@ pub use sys_tick_timeout::*;
 #[cfg(cortex_m)]
 mod sys_tick_timeout {
     use super::*;
-    use core::sync::atomic::{Ordering, compiler_fence};
     use cortex_m::peripheral::SYST;
     use os_trait::{KilohertzU32, TickDuration};
 
@@ -241,16 +240,12 @@ mod sys_tick_timeout {
         }
 
         fn now_tick_count() -> (u32, u32) {
-            let count = FreeRtosUtils::get_tick_count();
-            let sys_tick = SYST::get_current();
-            compiler_fence(Ordering::Acquire);
-            let count2 = FreeRtosUtils::get_tick_count();
-            let sys_tick2 = SYST::get_current();
-
-            if count != count2 {
-                (sys_tick2, count2)
-            } else {
-                (sys_tick, count)
+            loop {
+                let count = FreeRtosUtils::get_tick_count();
+                let sys_tick = SYST::get_current();
+                if count == FreeRtosUtils::get_tick_count() {
+                    return (sys_tick, count);
+                }
             }
         }
 
