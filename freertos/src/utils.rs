@@ -11,7 +11,7 @@ pub struct TypeSizeError {
     pub rust_size: usize,
 }
 
-#[cfg(feature = "cpu_clock")]
+#[cfg(feature = "cpu-clock")]
 pub fn cpu_clock_hz() -> u32 {
     unsafe { freertos_rs_get_configCPU_CLOCK_HZ() }
 }

@@ -31,10 +31,8 @@ fn app_main() -> ! {
         .freeze(rcc::Config::hse(8.MHz()).sysclk(sysclk), &mut flash.acr);
     assert_eq!(rcc.clocks().sysclk(), sysclk);
 
-    let mut gpiob = dp.GPIOB.split(&mut rcc);
-    let mut led = gpiob
-        .pb0
-        .into_open_drain_output_with_state(&mut gpiob.crl, PinState::High);
+    let gpiob = dp.GPIOB.split(&mut rcc);
+    let mut led = gpiob.pb0.into_open_drain_output_with_state(PinState::High);
 
     loop {
         CurrentTask::delay(Duration::ms(500));

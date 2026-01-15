@@ -65,9 +65,8 @@ extern crate alloc;
 
 pub mod prelude;
 
+mod assert_callback;
 mod base_type;
-#[cfg(feature = "hooks")]
-mod hooks;
 mod shim;
 
 #[cfg(feature = "allocator")]
@@ -108,6 +107,7 @@ pub use os_trait::{self, os_type_alias};
 
 #[cfg(feature = "allocator")]
 pub use crate::allocator::*;
+pub use crate::assert_callback::*;
 pub use crate::base::FreeRtosError;
 #[cfg(feature = "sync")]
 pub use crate::critical::*;
@@ -115,8 +115,6 @@ pub use crate::critical::*;
 pub use crate::delays::*;
 #[cfg(feature = "sync")]
 pub use crate::event_group::*;
-#[cfg(feature = "hooks")]
-pub use crate::hooks::*;
 #[cfg(feature = "interrupt")]
 pub use crate::isr::*;
 #[cfg(feature = "sync")]
@@ -133,6 +131,6 @@ pub use crate::task::*;
 pub use crate::timers::*;
 #[cfg(any(feature = "time", feature = "sync"))]
 pub use crate::units::*;
-#[cfg(feature = "cpu_clock")]
+#[cfg(feature = "cpu-clock")]
 pub use crate::utils::cpu_clock_hz;
 pub use crate::utils::{shim_sanity_check, str_from_c_string};

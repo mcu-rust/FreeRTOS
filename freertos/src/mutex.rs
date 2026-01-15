@@ -189,6 +189,7 @@ impl fmt::Debug for MutexNormal {
 
 pub struct MutexRecursive(FreeRtosSemaphoreHandle);
 
+#[cfg(feature = "recursive-mutex")]
 impl MutexInnerImpl for MutexRecursive {
     fn create() -> Result<Self, FreeRtosError> {
         let m = unsafe { freertos_rs_create_recursive_mutex() };
@@ -225,6 +226,7 @@ impl MutexInnerImpl for MutexRecursive {
     }
 }
 
+#[cfg(feature = "recursive-mutex")]
 impl Drop for MutexRecursive {
     fn drop(&mut self) {
         unsafe { freertos_rs_delete_semaphore(self.0) }

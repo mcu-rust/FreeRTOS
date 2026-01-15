@@ -15,7 +15,7 @@ fn main() {
 
     // Windows example specific stuff.
     if target_family == "windows" {
-        b.freertos_config("examples/win");
+        b.user_config_dir("examples/win");
         // TODO: in future all FreeRTOS API should be implemented by the crate
         // until then, we need to compile some C code manually
         b.add_build_file("examples/win/hooks.c");
@@ -27,14 +27,11 @@ fn main() {
     }
 
     if target == "x86_64-unknown-linux-gnu" {
-        b.freertos_config("examples/linux");
-
+        b.user_config_dir("examples/linux");
         b.add_build_file("examples/linux/hooks.c");
-        // b.add_build_file("examples/linux/Run-time-stats-utils.c"); // Unimplemented yet..
     }
-
     if target == "thumbv7m-none-eabi" {
-        b.freertos_config("examples/stm32-cortex-m3");
+        b.user_config_dir("examples/stm32-cortex-m3");
         copy(
             "examples/stm32-cortex-m3/memory.x",
             PathBuf::from(out_dir.as_str()).join("memory.x"),
@@ -42,7 +39,7 @@ fn main() {
         .unwrap();
     }
     if target == "thumbv7em-none-eabihf" {
-        b.freertos_config("examples/stm32-cortex-m4-blackpill");
+        b.user_config_dir("examples/stm32-cortex-m4-blackpill");
         copy(
             "examples/stm32-cortex-m4-blackpill/memory.x",
             PathBuf::from(out_dir.as_str()).join("memory.x"),
@@ -50,7 +47,7 @@ fn main() {
         .unwrap();
     }
     if target == "thumbv8m.main-none-eabihf" {
-        b.freertos_config("examples/nrf9160");
+        b.user_config_dir("examples/nrf9160");
         copy(
             "examples/nrf9160/memory.x",
             PathBuf::from(out_dir.as_str()).join("memory.x"),

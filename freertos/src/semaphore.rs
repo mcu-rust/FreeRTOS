@@ -24,6 +24,7 @@ impl Semaphore {
     }
 
     /// Create a new counting semaphore
+    #[cfg(feature = "counting-semaphore")]
     pub fn new_counting(max: u32, initial: u32) -> Result<Semaphore, FreeRtosError> {
         unsafe {
             let s = freertos_rs_create_counting_semaphore(max, initial);

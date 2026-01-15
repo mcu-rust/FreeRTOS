@@ -4,30 +4,17 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
-/// The FREERTOS_SRC env variable must point to the FreeRTOS kernel code.
-/// The Kernel can be found at Github: https://github.com/FreeRTOS/FreeRTOS-Kernel
-///
-/// When not set, you can use the Builder to specify the path
-const ENV_KEY_FREERTOS_SRC: &str = "DEP_FREERTOS_KERNEL";
-
-/// The FREERTOS_CONFIG variable must point to the directory
-/// where the FreeRTOSConfig.h file is located for the current project.
-///
-/// When not set, you can use the Builder to specify the path
-const ENV_KEY_FREERTOS_CONFIG: &str = "DEP_FREERTOS_CONFIG";
-
-/// FreeRTOS shim.c file to enable usage of FreeRTOS
-/// This variable is set by build.rs
-const ENV_KEY_FREERTOS_SHIM: &str = "DEP_FREERTOS_SHIM";
+const ENV_KEY_CRATE_DIR: &str = "DEP_FREERTOS_CRATE_DIR";
 
 #[derive(Clone, Debug)]
 pub struct Builder {
     freertos_dir: PathBuf,
-    freertos_config_dir: PathBuf,
-    freertos_shim: PathBuf,
+    config_dir: PathBuf,
+    user_config_dir: Option<PathBuf>,
+    shim_file: PathBuf,
     freertos_port: Option<PathBuf>,
     freertos_port_base: Option<PathBuf>,
-    // name of the heap_?.c file
+    /// name of the heap_?.c file
     heap_c: PathBuf,
     cc: Build,
 }
@@ -46,14 +33,13 @@ impl Error {
 
 impl Default for Builder {
     fn default() -> Self {
-        let freertos_path = env::var(ENV_KEY_FREERTOS_SRC).unwrap_or_default();
-        let freertos_config_path = env::var(ENV_KEY_FREERTOS_CONFIG).unwrap_or_default();
-        let freertos_shim = env::var(ENV_KEY_FREERTOS_SHIM).unwrap_or_default();
+        let crate_dir = PathBuf::from(env::var(ENV_KEY_CRATE_DIR).unwrap());
 
         Self {
-            freertos_dir: PathBuf::from(freertos_path),
-            freertos_config_dir: PathBuf::from(freertos_config_path),
-            freertos_shim: PathBuf::from(freertos_shim),
+            freertos_dir: crate_dir.join("FreeRTOS-Kernel"),
+            shim_file: crate_dir.join("src/freertos/shim.c"),
+            config_dir: crate_dir.join("src/config"),
+            user_config_dir: None,
             freertos_port: None,
             freertos_port_base: None,
             cc: cc::Build::new(),
@@ -72,40 +58,24 @@ impl Builder {
         Self::default()
     }
 
-    /// Set the path to freeRTOS source
-    /// Default is loaded from ENV variable "FREERTOS_SRC"
-    pub fn freertos<P: AsRef<Path>>(&mut self, path: P) {
+    /// Set the path to FreeRTOS-Kernel source files
+    pub fn freertos_kernel<P: AsRef<Path>>(&mut self, path: P) {
         self.freertos_dir = path.as_ref().to_path_buf();
     }
-    /// Set the path to freeRTOSConfig.h
-    /// Default is loaded from ENV variable, see: ENV_KEY_FREERTOS_CONFIG
-    pub fn freertos_config<P: AsRef<Path>>(&mut self, path: P) {
-        self.freertos_config_dir = path.as_ref().to_path_buf();
+
+    /// Set the path to the directory of `FreeRTOSConfig.h`
+    pub fn freertos_config_dir<P: AsRef<Path>>(&mut self, path: P) {
+        self.config_dir = path.as_ref().to_path_buf();
+    }
+
+    /// Set the path to the directory of `UserConfig.h`
+    pub fn user_config_dir<P: AsRef<Path>>(&mut self, path: P) {
+        self.user_config_dir = Some(path.as_ref().to_path_buf());
     }
 
     /// Set the path to shim.c
-    /// Default is loaded from ENV variable, see: ENV_KEY_FREERTOS_SHIM
-    pub fn freertos_shim<P: AsRef<Path>>(&mut self, path: P) {
-        self.freertos_shim = path.as_ref().to_path_buf();
-    }
-
-    /// Returns a list of all files in the shim folder
-    fn freertos_shim_files(&self) -> Vec<PathBuf> {
-        let files: Vec<_> = WalkDir::new(self.freertos_shim.as_path())
-            .follow_links(false)
-            .max_depth(1)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter_map(|entry| {
-                let f_name = entry.path().to_str().unwrap();
-
-                if f_name.ends_with(".c") {
-                    return Some(entry.path().to_owned());
-                }
-                None
-            })
-            .collect();
-        files
+    pub fn shim_file<P: AsRef<Path>>(&mut self, path: P) {
+        self.shim_file = path.as_ref().to_path_buf();
     }
 
     /// Returns a list of all FreeRTOS source files
@@ -223,9 +193,6 @@ impl Builder {
             .join("portable/MemMang")
             .join(&self.heap_c)
     }
-    fn shim_c_file(&self) -> PathBuf {
-        self.freertos_shim.join("shim.c")
-    }
 
     /// Check that all required files and paths exist
     fn verify_paths(&self) -> Result<(), Error> {
@@ -260,27 +227,28 @@ impl Builder {
             )));
         }
 
-        // Allows to find the FreeRTOSConfig.h
-        if !self.freertos_config_dir.is_dir() {
-            return Err(Error::new(&format!(
-                "Directory freertos_config_dir does not exist: {}",
-                self.freertos_config_dir.to_str().unwrap()
-            )));
-        }
         // Make sure FreeRTOSConfig.h exists in freertos_config_dir
-        if !self.freertos_config_dir.join("FreeRTOSConfig.h").is_file() {
+        if !self.config_dir.join("FreeRTOSConfig.h").is_file() {
             return Err(Error::new(&format!(
-                "File FreeRTOSConfig.h does not exist in the freertos_config_dir directory: {}",
-                self.freertos_config_dir.to_str().unwrap()
+                "File FreeRTOSConfig.h does not exist in the directory: {}",
+                self.config_dir.to_str().unwrap()
             )));
         }
 
+        if let Some(dir) = &self.user_config_dir {
+            if !dir.join("UserConfig.h").is_file() {
+                return Err(Error::new(&format!(
+                    "File UserConfig.h does not exist in the directory: {}",
+                    dir.to_str().unwrap()
+                )));
+            }
+        }
+
         // Add the freertos shim.c
-        let shim_c = self.shim_c_file();
-        if !shim_c.is_file() {
+        if !self.shim_file.is_file() {
             return Err(Error::new(&format!(
                 "File freertos_shim '{}' does not exist, missing freertos dependency?",
-                shim_c.to_str().unwrap()
+                self.shim_file.to_str().unwrap()
             )));
         }
 
@@ -288,26 +256,39 @@ impl Builder {
     }
 
     pub fn compile(&self) -> Result<(), Error> {
-        let mut b = self.cc.clone();
+        let mut cc = self.cc.clone();
 
         self.verify_paths()?;
 
-        add_include_with_rerun(&mut b, self.freertos_include_dir()); // FreeRTOS header files
-        add_include_with_rerun(&mut b, self.get_freertos_port_dir()); // FreeRTOS port header files (e.g. portmacro.h)
-        add_include_with_rerun(&mut b, &self.freertos_config_dir); // User's FreeRTOSConfig.h
+        add_include_with_rerun(&mut cc, self.freertos_include_dir()); // FreeRTOS header files
+        add_include_with_rerun(&mut cc, self.get_freertos_port_dir()); // FreeRTOS port header files (e.g. portmacro.h)
+        add_include_with_rerun(&mut cc, &self.config_dir); // FreeRTOSConfig.h
+        if let Some(dir) = &self.user_config_dir {
+            add_include_with_rerun(&mut cc, dir); // User's UserConfig.h
+            println!("cargo:rerun-if-env-changed={}", dir.to_str().unwrap());
+        }
 
-        add_build_files_with_rerun(&mut b, self.freertos_files()); // Non-port C files
-        add_build_files_with_rerun(&mut b, self.freertos_port_files()); // Port C files
-        add_build_files_with_rerun(&mut b, self.freertos_shim_files()); // Shim C file
-        add_build_file_with_rerun(&mut b, self.heap_c_file()); // Heap C file
+        add_build_files_with_rerun(&mut cc, self.freertos_files()); // Non-port C files
+        add_build_files_with_rerun(&mut cc, self.freertos_port_files()); // Port C files
+        add_build_file_with_rerun(&mut cc, &self.shim_file); // Shim C file
+        add_build_file_with_rerun(&mut cc, self.heap_c_file()); // Heap C file
 
-        setup_all_define(&mut b);
+        setup_all_define(&mut cc);
 
-        println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_SRC}");
-        println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_CONFIG}");
-        println!("cargo:rerun-if-env-changed={ENV_KEY_FREERTOS_SHIM}");
+        println!(
+            "cargo:rerun-if-env-changed={}",
+            self.freertos_dir.to_str().unwrap()
+        );
+        println!(
+            "cargo:rerun-if-env-changed={}",
+            self.config_dir.to_str().unwrap()
+        );
+        println!(
+            "cargo:rerun-if-env-changed={}",
+            self.shim_file.to_str().unwrap()
+        );
 
-        b.try_compile("freertos")
+        cc.try_compile("freertos")
             .map_err(|e| Error::new(&format!("{}", e)))?;
 
         Ok(())
@@ -364,11 +345,15 @@ fn add_include_with_rerun<P: AsRef<Path>>(build: &mut Build, dir: P) {
 }
 
 fn setup_all_define(cc: &mut cc::Build) {
+    sync_define(cc, "__IS_CORTEX_M");
     sync_define(cc, "INCLUDE_vTaskDelete");
     sync_define(cc, "INCLUDE_vTaskDelayUntil");
     sync_define(cc, "INCLUDE_uxTaskGetStackHighWaterMark");
     sync_define(cc, "INCLUDE_HeapFreeSize");
-    cc.define("INCLUDE_vTaskDelay", "1");
+    sync_define(cc, "INCLUDE_vTaskSuspend");
+    sync_define(cc, "configUSE_RECURSIVE_MUTEXES");
+    sync_define(cc, "configUSE_COUNTING_SEMAPHORES");
+    sync_define(cc, "configUSE_TRACE_FACILITY");
 }
 
 fn sync_define(cc: &mut cc::Build, def: &str) {

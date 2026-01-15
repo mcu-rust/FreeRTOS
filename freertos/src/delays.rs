@@ -1,17 +1,17 @@
 use crate::base::*;
-#[cfg(feature = "delay_until")]
+#[cfg(feature = "delay-until")]
 use crate::shim::*;
 use crate::task::*;
 use crate::units::*;
 
-#[cfg(feature = "delay_until")]
+#[cfg(feature = "delay-until")]
 /// Delay the current task by the given duration, minus the
 /// time that was spent processing the last wakeup loop.
 pub struct TaskDelay {
     last_wake_time: FreeRtosTickType,
 }
 
-#[cfg(feature = "delay_until")]
+#[cfg(feature = "delay-until")]
 impl TaskDelay {
     /// Create a new helper, marking the current time as the start of the
     /// next measurement.

@@ -191,13 +191,13 @@ impl Task {
                     });
                 }
 
-                #[cfg(feature = "delete_task")]
+                #[cfg(feature = "delete-task")]
                 freertos_rs_delete_task(0 as *const _);
             }
 
-            #[cfg(feature = "delete_task")]
+            #[cfg(feature = "delete-task")]
             return 0 as *mut _;
-            #[cfg(not(feature = "delete_task"))]
+            #[cfg(not(feature = "delete-task"))]
             panic!("Not allowed to quit the task!");
         }
 
@@ -304,19 +304,20 @@ impl Task {
     }
 
     /// Get the minimum amount of stack that was ever left on this task in words.
-    #[cfg(feature = "stack_high_water")]
+    #[cfg(feature = "stack-high-water")]
     #[inline]
     pub fn get_stack_high_water_mark(&self) -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(self.task_handle) as u32 }
     }
 
     /// Get the minimum amount of stack that was ever left on this task in bytes.
-    #[cfg(feature = "stack_high_water")]
+    #[cfg(feature = "stack-high-water")]
     #[inline]
     pub fn get_stack_high_water_mark_bytes(&self) -> u32 {
         self.get_stack_high_water_mark() * 4
     }
 
+    #[cfg(feature = "trace-facility")]
     pub fn get_id(&self) -> Result<FreeRtosBaseType, FreeRtosError> {
         let task_id = unsafe { freertos_rs_uxTaskGetTaskNumber(self.task_handle) };
         if task_id == 0 {
@@ -326,6 +327,7 @@ impl Task {
         }
     }
 
+    #[cfg(feature = "trace-facility")]
     pub fn set_id(&mut self, value: FreeRtosUBaseType) {
         unsafe { freertos_rs_vTaskSetTaskNumber(self.task_handle, value) };
     }
@@ -342,6 +344,7 @@ impl CurrentTask {
         }
     }
 
+    #[cfg(feature = "task-suspend")]
     pub fn suspend() {
         unsafe { freertos_rs_suspend_task(0 as FreeRtosTaskHandle) }
     }
@@ -356,14 +359,14 @@ impl CurrentTask {
     }
 
     /// Get the minimum amount of stack that was ever left on the current task.
-    #[cfg(feature = "stack_high_water")]
+    #[cfg(feature = "stack-high-water")]
     #[inline]
     pub fn get_stack_high_water_mark() -> u32 {
         unsafe { freertos_rs_get_stack_high_water_mark(0 as FreeRtosTaskHandle) as u32 }
     }
 
     /// Get the minimum amount of stack that was ever left on this task in bytes.
-    #[cfg(feature = "stack_high_water")]
+    #[cfg(feature = "stack-high-water")]
     #[inline]
     pub fn get_stack_high_water_mark_bytes() -> u32 {
         Self::get_stack_high_water_mark() * 4
@@ -490,6 +493,7 @@ impl FreeRtosUtils {
         unsafe { freertos_rs_get_number_of_tasks() as usize }
     }
 
+    #[cfg(feature = "trace-facility")]
     pub fn get_all_tasks(tasks_len: Option<usize>) -> FreeRtosSystemState {
         let tasks_len = tasks_len.unwrap_or(Self::get_number_of_tasks());
         let mut tasks = Vec::with_capacity(tasks_len as usize);

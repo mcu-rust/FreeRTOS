@@ -59,13 +59,6 @@
  * http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
 
-// FreeRTOS Exception handler mapping to rust cortex-m-rt crate linker file naming
-#define SVC_Handler     SVCall
-#define SysTick_Handler SysTick
-#define PendSV_Handler  PendSV
-
-// extern uint32_t SystemCoreClock;
-
 #define configRUN_FREERTOS_SECURE_ONLY 1
 #define configENABLE_TRUSTZONE         0
 
@@ -78,12 +71,10 @@
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 
 /* Constants related to the behaviour or the scheduler. */
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
-#define configUSE_PREEMPTION                    1
-#define configUSE_TIME_SLICING                  1
-#define configMAX_PRIORITIES                    (5)
-#define configIDLE_SHOULD_YIELD                 1
-#define configUSE_16_BIT_TICKS                  0 /* Only for 8 and 16-bit hardware. */
+#define configUSE_PREEMPTION    1
+#define configUSE_TIME_SLICING  1
+#define configMAX_PRIORITIES    (5)
+#define configIDLE_SHOULD_YIELD 1
 
 /* Constants that describe the hardware and memory usage. */
 #define configCPU_CLOCK_HZ              (64000000UL)  // 64M // from HAL: SystemCoreClock
@@ -93,16 +84,9 @@
 #define configTOTAL_HEAP_SIZE           ((size_t)(50 * 1024))
 
 /* Constants that build features in or out. */
-#define configUSE_MUTEXES              1
-#define configUSE_TICKLESS_IDLE        0
-#define configUSE_APPLICATION_TASK_TAG 0
-#define configUSE_NEWLIB_REENTRANT     0
-#define configUSE_CO_ROUTINES          0
-#define configUSE_COUNTING_SEMAPHORES  1
-#define configUSE_RECURSIVE_MUTEXES    1
-#define configUSE_QUEUE_SETS           0
-#define configUSE_TASK_NOTIFICATIONS   1
-#define configUSE_TRACE_FACILITY       1
+#define configUSE_TICKLESS_IDLE    0
+#define configUSE_NEWLIB_REENTRANT 0
+#define configUSE_QUEUE_SETS       0
 
 /* Constants that define which hook (callback) functions should be used. */
 #define configUSE_IDLE_HOOK          0
@@ -112,11 +96,6 @@
 /* Constants provided for debugging and optimisation assistance. */
 #define configCHECK_FOR_STACK_OVERFLOW 2
 
-extern void vAssertCalled(const char *file, int linenum);
-
-#define configASSERT(x) \
-    if ((x) == 0)       \
-    vAssertCalled(__FILE__, __LINE__)
 #define configQUEUE_REGISTRY_SIZE 0
 
 /* Software timer definitions. */
@@ -128,28 +107,6 @@ extern void vAssertCalled(const char *file, int linenum);
 /* Have FreeRTOS provide an errno variable in task handle.
  * We need errno for bsd_lib */
 #define configUSE_POSIX_ERRNO 1
-
-/* Set the following definitions to 1 to include the API function, or zero
- * to exclude the API function.  NOTE:  Setting an INCLUDE_ parameter to 0 is
- * only necessary if the linker does not automatically remove functions that are
- * not referenced anyway. */
-#define INCLUDE_vTaskPrioritySet          1
-#define INCLUDE_uxTaskPriorityGet         1
-#define INCLUDE_vTaskCleanUpResources     0
-#define INCLUDE_vTaskSuspend              1
-#define INCLUDE_xTaskGetIdleTaskHandle    0
-#define INCLUDE_eTaskGetState             1
-#define INCLUDE_xTaskResumeFromISR        0
-#define INCLUDE_xTaskGetCurrentTaskHandle 1
-#define INCLUDE_xTaskGetSchedulerState    0
-#define INCLUDE_xSemaphoreGetMutexHolder  0
-#define INCLUDE_xTimerPendFunctionCall    1
-
-/* This demo makes use of one or more example stats formatting functions.  These
- * format the raw data provided by the uxTaskGetSystemState() function in to
- * human readable ASCII form.  See the notes in the implementation of vTaskList()
- * within FreeRTOS/Source/tasks.c for limitations. */
-#define configUSE_STATS_FORMATTING_FUNCTIONS 1
 
 /* Dimensions a buffer that can be used by the FreeRTOS+CLI command interpreter.
  * See the FreeRTOS+CLI documentation for more information:

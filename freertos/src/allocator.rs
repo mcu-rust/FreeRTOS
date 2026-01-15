@@ -11,7 +11,7 @@ Use with:
 
 pub struct FreeRtosAllocator;
 
-#[cfg(feature = "heap_free_size")]
+#[cfg(feature = "heap-free-size")]
 impl FreeRtosAllocator {
     pub fn get_free_size(&self) -> usize {
         unsafe { freertos_rs_get_free_heap_size() }

@@ -10,7 +10,7 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     links = "freertos"
     name = "freertos-next"
     readme = "README.md"
-    version = "0.10.0"
+    version = "0.11.0"
 
 
 [lib]
@@ -23,28 +23,33 @@ The freertos-build crate can be used to build and link FreeRTOS from source insi
     minimum = ["allocator", "sync", "time"]
     standard = [
         "minimum",
-        "hooks",
-        "delete_task",
-        "stack_high_water",
-        "critical_section_impl",
+        "delete-task",
+        "heap-free-size",
+        "stack-high-water",
+        "critical-section-impl",
     ]
 
     allocator = []
-    cpu_clock = []
-    critical_section_impl = ["critical-section/restore-state-u32"]
-    delay_until = []
-    delete_task = []
-    heap_free_size = ["allocator"]
-    hooks = []
+    assert-hook = []
+    counting-semaphore = []
+    cpu-clock = []
+    critical-section-impl = ["critical-section/restore-state-u32"]
+    delay-until = []
+    delete-task = []
+    heap-free-size = ["allocator"]
     interrupt = []
-    stack_high_water = []
+    recursive-mutex = []
+    stack-high-water = []
     sync = ["interrupt"]
+    task-suspend = []
     time = ["interrupt"]
+    trace-facility = []
 
 [dependencies]
     critical-section = "1"
     mutex-traits = "1"
     os-trait = "0.10"
+    # os-trait = { path = "../../../rust/os-trait" }
 
 [target.'cfg(all(target_arch = "arm", target_os = "none", any(target_abi = "eabi", target_abi = "eabihf")))'.dependencies]
     cortex-m = "0.7"

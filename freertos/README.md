@@ -28,17 +28,20 @@ cargo add --build freertos-build
 ```rust
 fn main() {
     let mut b = freertos_build::Builder::new();
-    b.freertos_config("src_c"); // Path to your FreeRTOSConfig.h
+    b.user_config_dir("src_c"); // Path to your UserConfig.h
     b.compile().unwrap();
 }
 ```
 3. Optional configuration:
 ```rust
 // Use your own FreeRTOS-Kernel source tree
-b.freertos("path/to/FreeRTOS-Kernel");
+b.freertos_kernel("path/to/FreeRTOS-Kernel");
 
 // Override the default port (relative to FreeRTOS-Kernel/portable)
 b.freertos_port("GCC/ARM_CM3");
+
+// Override the internal FreeRTOSConfig.h
+b.freertos_config_dir("path/to/config");
 
 // Select the heap allocator from FreeRTOS-Kernel/portable/MemMang
 // Default: heap_4.c

@@ -148,7 +148,7 @@ impl<'mutex, T: ?Sized> Drop for SuspendSchedulerGuard<'mutex, T> {
     }
 }
 
-#[cfg(feature = "critical_section_impl")]
+#[cfg(feature = "critical-section-impl")]
 mod critical_section_impl {
     use super::*;
     use crate::is_in_isr;

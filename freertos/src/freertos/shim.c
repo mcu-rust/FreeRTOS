@@ -163,9 +163,11 @@ SemaphoreHandle_t freertos_rs_create_binary_semaphore() {
     return xSemaphoreCreateBinary();
 }
 
+#if (configUSE_COUNTING_SEMAPHORES == 1)
 SemaphoreHandle_t freertos_rs_create_counting_semaphore(UBaseType_t max, UBaseType_t initial) {
     return xSemaphoreCreateCounting(max, initial);
 }
+#endif
 
 void freertos_rs_delete_semaphore(SemaphoreHandle_t semaphore) {
     vSemaphoreDelete(semaphore);
@@ -232,9 +234,11 @@ void freertos_rs_delete_task(TaskHandle_t task) {
 }
 #endif
 
+#if (INCLUDE_vTaskSuspend == 1)
 void freertos_rs_suspend_task(TaskHandle_t task) {
     vTaskSuspend(task);
 }
+#endif
 
 #if (INCLUDE_uxTaskGetStackHighWaterMark == 1)
 UBaseType_t freertos_rs_get_stack_high_water_mark(TaskHandle_t task) {
