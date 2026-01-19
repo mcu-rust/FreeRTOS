@@ -43,8 +43,7 @@ fn main() {
     }
 }
 
-fn check_feature(name: &str) -> bool {
-    let s = name.replace("-", "_");
-    let ft = "CARGO_FEATURE_".to_string() + &s.to_uppercase();
-    env::var(ft).map_or(false, |v| v == "1")
+fn check_feature(ft: &str) -> bool {
+    let env_str = "CARGO_FEATURE_".to_string() + &ft.replace("-", "_").to_uppercase();
+    env::var(env_str).map_or(false, |v| v == "1")
 }

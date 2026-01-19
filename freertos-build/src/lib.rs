@@ -1,3 +1,4 @@
+#![doc = include_str!("../README.md")]
 use cc::Build;
 use std::env;
 use std::ffi::OsStr;
