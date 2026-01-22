@@ -19,9 +19,40 @@ cargo add --build freertos-build
 
 Add the following snippet to your application's `build.rs`:
 ```rust
+use freertos_build::prelude::*;
+
 fn main() {
     let mut b = freertos_build::Builder::new();
-    b.user_config_dir("src_c"); // Location of `UserConfig.h`
+    b.cpu_clock(72.MHz());
+    b.heap_size(10 * 1024);
+    b.minimal_stack_size(80);
+    b.interrupt_priority_bits(4, 5, 15);
     b.compile().unwrap();
 }
+```
+Optional configuration:
+```rust
+// Use your own FreeRTOS-Kernel source tree
+b.freertos_kernel("path/to/FreeRTOS-Kernel");
+
+// Override the default port (relative to FreeRTOS-Kernel/portable)
+b.freertos_port("GCC/ARM_CM3");
+
+// Use UserConfig.h
+b.user_config_dir("path/to/config/directory");
+
+// Override the internal FreeRTOSConfig.h
+b.freertos_config_dir("path/to/config/directory");
+
+// Select the heap allocator from FreeRTOS-Kernel/portable/MemMang
+// Default: heap_4.c
+b.heap("heap_4.c");
+
+b.use_timer_task(1, 10, 200);
+b.max_task_priorities(5);
+b.use_preemption(true);
+b.idle_should_yield(true);
+b.max_task_name_len(16);
+b.queue_registry_size(8);
+b.check_for_stack_overflow(2);
 ```

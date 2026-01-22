@@ -39,30 +39,15 @@
  * http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
 
-#define configUSE_PREEMPTION               1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 1
 
 /* In this simulated case, the stack only has to hold one small structure as the real stack
     is part of the win32 thread. */
-#define configMINIMAL_STACK_SIZE                      ((unsigned short)70)
-#define configTOTAL_HEAP_SIZE                         ((size_t)(10 * 1024))
-#define configMAX_TASK_NAME_LEN                       (12)
-#define configIDLE_SHOULD_YIELD                       1
-#define configCHECK_FOR_STACK_OVERFLOW                0
-#define configQUEUE_REGISTRY_SIZE                     20
 #define configUSE_ALTERNATIVE_API                     0
 #define configUSE_QUEUE_SETS                          1
 #define configSUPPORT_STATIC_ALLOCATION               1
 #define configINITIAL_TICK_COUNT                      ((TickType_t)0) /* For test. */
 #define configSTREAM_BUFFER_TRIGGER_LEVEL_TEST_MARGIN 1               /* As there are a lot of tasks running. */
-
-/* Software timer related configuration options. */
-#define configUSE_TIMERS             1
-#define configTIMER_TASK_PRIORITY    (configMAX_PRIORITIES - 1)
-#define configTIMER_QUEUE_LENGTH     20
-#define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE * 2)
-
-#define configMAX_PRIORITIES (7)
 
 /* Run time stats gathering configuration options. */
 unsigned long ulGetRunTimeCounterValue(void); /* Prototype of function that returns run time counter. */

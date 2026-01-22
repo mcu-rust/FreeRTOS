@@ -1,3 +1,4 @@
+use freertos_build::prelude::*;
 use std::env;
 use std::fs::copy;
 use std::path::PathBuf;
@@ -9,7 +10,7 @@ fn main() {
     let target = env::var("TARGET").unwrap_or_default();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").unwrap_or_default();
-    let out_dir = env::var("OUT_DIR").unwrap();
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap().as_str());
 
     let mut b = freertos_build::Builder::new();
 
@@ -20,39 +21,49 @@ fn main() {
         // until then, we need to compile some C code manually
         b.add_build_file("examples/win/hooks.c");
         b.add_build_file("examples/win/Run-time-stats-utils.c");
+        b.use_timer_task(4, 20, 200);
+        b.queue_registry_size(20);
 
         if target_env == "msvc" {
             println!("cargo:rustc-link-lib=static=winmm");
         }
-    }
-
-    if target == "x86_64-unknown-linux-gnu" {
+    } else if target == "x86_64-unknown-linux-gnu" {
         b.user_config_dir("examples/linux");
         b.add_build_file("examples/linux/hooks.c");
-    }
-    if target == "thumbv7m-none-eabi" {
-        b.user_config_dir("examples/stm32-cortex-m3");
+        b.use_timer_task(4, 20, 200);
+        b.queue_registry_size(20);
+    } else if target == "thumbv7m-none-eabi" {
+        b.cpu_clock(72.MHz());
+        b.heap_size(10 * 1024);
+        b.minimal_stack_size(80);
+        b.use_timer_task(1, 10, 200);
+        b.interrupt_priority_bits(4, 5, 15);
         copy(
             "examples/stm32-cortex-m3/memory.x",
-            PathBuf::from(out_dir.as_str()).join("memory.x"),
+            out_dir.join("memory.x"),
         )
         .unwrap();
-    }
-    if target == "thumbv7em-none-eabihf" {
-        b.user_config_dir("examples/stm32-cortex-m4-blackpill");
+    } else if target == "thumbv7em-none-eabihf" {
+        b.cpu_clock(100.MHz());
+        b.heap_size(15 * 1024);
+        b.minimal_stack_size(80);
+        b.use_timer_task(1, 10, 200);
+        b.interrupt_priority_bits(4, 5, 15);
+        b.check_for_stack_overflow(2);
         copy(
             "examples/stm32-cortex-m4-blackpill/memory.x",
-            PathBuf::from(out_dir.as_str()).join("memory.x"),
+            out_dir.join("memory.x"),
         )
         .unwrap();
-    }
-    if target == "thumbv8m.main-none-eabihf" {
+    } else if target == "thumbv8m.main-none-eabihf" {
         b.user_config_dir("examples/nrf9160");
-        copy(
-            "examples/nrf9160/memory.x",
-            PathBuf::from(out_dir.as_str()).join("memory.x"),
-        )
-        .unwrap();
+        b.cpu_clock(64.MHz());
+        b.heap_size(50 * 1024);
+        b.minimal_stack_size(128);
+        b.use_timer_task(3, 5, 200);
+        b.interrupt_priority_bits(3, 2, 7);
+        b.check_for_stack_overflow(2);
+        copy("examples/nrf9160/memory.x", out_dir.join("memory.x")).unwrap();
     }
 
     b.compile().unwrap();

@@ -17,6 +17,7 @@
 The crate is published as **freertos-next** on crates.io because the more obvious names (`freertos`, `freertos-rust`) are already taken.
 
 ## 📦 Usage
+[freertos-next](https://github.com/mcu-rust/FreeRTOS/tree/main/freertos) works together with [freertos-build](https://crates.io/crates/freertos-build).
 
 1. Add the dependencies to your application:
 
@@ -26,28 +27,20 @@ cargo add --build freertos-build
 ```
 2. Add the following snippet to your application's `build.rs`:
 ```rust
+use freertos_build::prelude::*;
+
 fn main() {
     let mut b = freertos_build::Builder::new();
-    b.user_config_dir("src_c"); // Path to your UserConfig.h
+    b.cpu_clock(72.MHz());
+    b.heap_size(10 * 1024);
+    b.minimal_stack_size(80);
+    b.interrupt_priority_bits(4, 5, 15);
     b.compile().unwrap();
 }
 ```
-3. Optional configuration:
-```rust
-// Use your own FreeRTOS-Kernel source tree
-b.freertos_kernel("path/to/FreeRTOS-Kernel");
+3. For more Optional configuration, see [freertos-build](https://crates.io/crates/freertos-build)
 
-// Override the default port (relative to FreeRTOS-Kernel/portable)
-b.freertos_port("GCC/ARM_CM3");
-
-// Override the internal FreeRTOSConfig.h
-b.freertos_config_dir("path/to/config");
-
-// Select the heap allocator from FreeRTOS-Kernel/portable/MemMang
-// Default: heap_4.c
-b.heap("heap_4.c");
-```
-[freertos-next](https://github.com/mcu-rust/FreeRTOS/tree/main/freertos) works together with [freertos-build](https://crates.io/crates/freertos-build). A complete example using [freertos-next](https://github.com/mcu-rust/FreeRTOS/tree/main/freertos) with [stm32f1-hal](https://crates.io/crates/stm32f1-hal) is available here: [stm32f1-FreeRTOS-example](https://github.com/mcu-rust/stm32f1-FreeRTOS-example)
+ A complete example using `freertos-next` with [stm32f1-hal](https://crates.io/crates/stm32f1-hal) is available here: [stm32f1-FreeRTOS-example](https://github.com/mcu-rust/stm32f1-FreeRTOS-example)
 
 ## 📘 C Compiler
 

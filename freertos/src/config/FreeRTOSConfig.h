@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "UserConfig.h"
+#ifdef __HAS_USER_CONFIG
+#    include "UserConfig.h"
+#endif
 
 #ifdef __IS_CORTEX_M
 #    define vPortSVCHandler     SVCall

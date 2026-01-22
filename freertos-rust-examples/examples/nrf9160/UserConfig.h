@@ -71,17 +71,10 @@
 #define configSUPPORT_DYNAMIC_ALLOCATION 1
 
 /* Constants related to the behaviour or the scheduler. */
-#define configUSE_PREEMPTION    1
-#define configUSE_TIME_SLICING  1
-#define configMAX_PRIORITIES    (5)
-#define configIDLE_SHOULD_YIELD 1
+#define configUSE_TIME_SLICING 1
 
 /* Constants that describe the hardware and memory usage. */
-#define configCPU_CLOCK_HZ              (64000000UL)  // 64M // from HAL: SystemCoreClock
-#define configMINIMAL_STACK_SIZE        ((uint16_t)128)
 #define configMINIMAL_SECURE_STACK_SIZE (1024)
-#define configMAX_TASK_NAME_LEN         (12)
-#define configTOTAL_HEAP_SIZE           ((size_t)(50 * 1024))
 
 /* Constants that build features in or out. */
 #define configUSE_TICKLESS_IDLE    0
@@ -93,17 +86,6 @@
 #define configUSE_TICK_HOOK          0
 #define configUSE_MALLOC_FAILED_HOOK 0
 
-/* Constants provided for debugging and optimisation assistance. */
-#define configCHECK_FOR_STACK_OVERFLOW 2
-
-#define configQUEUE_REGISTRY_SIZE 0
-
-/* Software timer definitions. */
-#define configUSE_TIMERS             1
-#define configTIMER_TASK_PRIORITY    (3)
-#define configTIMER_QUEUE_LENGTH     5
-#define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE)
-
 /* Have FreeRTOS provide an errno variable in task handle.
  * We need errno for bsd_lib */
 #define configUSE_POSIX_ERRNO 1
@@ -112,33 +94,6 @@
  * See the FreeRTOS+CLI documentation for more information:
  * http://www.FreeRTOS.org/FreeRTOS-Plus/FreeRTOS_Plus_CLI/ */
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE 2048
-
-/* Interrupt priority configuration follows...................... */
-
-/* Use the system definition, if there is one. */
-#ifdef __NVIC_PRIO_BITS
-#    define configPRIO_BITS __NVIC_PRIO_BITS
-#else
-#    define configPRIO_BITS 3 /* 8 priority levels. */
-#endif
-
-/* The lowest interrupt priority that can be used in a call to a "set priority"
- * function. */
-#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 0x07
-
-/* The highest interrupt priority that can be used by any interrupt service
- * routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT
- * CALL INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A
- * HIGHER PRIORITY THAN THIS! (higher priorities are lower numeric values). */
-#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 2
-
-/* Interrupt priorities used by the kernel port layer itself.  These are generic
- * to all Cortex-M ports, and do not rely on any particular library functions. */
-#define configKERNEL_INTERRUPT_PRIORITY (configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
-
-/* !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
- * See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY (configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS))
 
 /* The #ifdef guards against the file being included from IAR assembly files. */
 #ifndef __IASMARM__

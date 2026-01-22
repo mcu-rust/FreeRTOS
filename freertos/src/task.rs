@@ -4,6 +4,7 @@ use crate::isr::*;
 use crate::shim::*;
 use crate::units::*;
 use crate::utils::*;
+use core::mem::size_of;
 
 unsafe impl Send for Task {}
 
@@ -75,8 +76,8 @@ impl TaskBuilder {
     }
 
     /// Set the stack size, in bytes.
-    pub fn stack_size_bytes(&mut self, stack_size: u32) -> &mut Self {
-        self.task_stack_size = (stack_size / 4) as u16;
+    pub fn stack_size_bytes(&mut self, stack_size: usize) -> &mut Self {
+        self.task_stack_size = (stack_size / size_of::<usize>()) as u16;
         self
     }
 
@@ -306,15 +307,15 @@ impl Task {
     /// Get the minimum amount of stack that was ever left on this task in words.
     #[cfg(feature = "stack-high-water")]
     #[inline]
-    pub fn get_stack_high_water_mark(&self) -> u32 {
-        unsafe { freertos_rs_get_stack_high_water_mark(self.task_handle) as u32 }
+    pub fn get_stack_high_water_mark(&self) -> usize {
+        unsafe { freertos_rs_get_stack_high_water_mark(self.task_handle) as usize }
     }
 
     /// Get the minimum amount of stack that was ever left on this task in bytes.
     #[cfg(feature = "stack-high-water")]
     #[inline]
-    pub fn get_stack_high_water_mark_bytes(&self) -> u32 {
-        self.get_stack_high_water_mark() * 4
+    pub fn get_stack_high_water_mark_bytes(&self) -> usize {
+        self.get_stack_high_water_mark() * size_of::<usize>()
     }
 
     #[cfg(feature = "trace-facility")]
@@ -361,15 +362,15 @@ impl CurrentTask {
     /// Get the minimum amount of stack that was ever left on the current task.
     #[cfg(feature = "stack-high-water")]
     #[inline]
-    pub fn get_stack_high_water_mark() -> u32 {
-        unsafe { freertos_rs_get_stack_high_water_mark(0 as FreeRtosTaskHandle) as u32 }
+    pub fn get_stack_high_water_mark() -> usize {
+        unsafe { freertos_rs_get_stack_high_water_mark(0 as FreeRtosTaskHandle) as usize }
     }
 
     /// Get the minimum amount of stack that was ever left on this task in bytes.
     #[cfg(feature = "stack-high-water")]
     #[inline]
-    pub fn get_stack_high_water_mark_bytes() -> u32 {
-        Self::get_stack_high_water_mark() * 4
+    pub fn get_stack_high_water_mark_bytes() -> usize {
+        Self::get_stack_high_water_mark() * size_of::<usize>()
     }
 }
 

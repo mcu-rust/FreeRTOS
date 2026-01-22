@@ -1,5 +1,10 @@
 #![doc = include_str!("../README.md")]
+
+pub mod prelude;
+
 use cc::Build;
+use fugit::HertzU32;
+use prelude::*;
 use std::env;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -7,7 +12,7 @@ use walkdir::WalkDir;
 
 const ENV_KEY_CRATE_DIR: &str = "DEP_FREERTOS_CRATE_DIR";
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct Builder {
     freertos_dir: PathBuf,
     config_dir: PathBuf,
@@ -18,6 +23,39 @@ pub struct Builder {
     /// name of the heap_?.c file
     heap_c: PathBuf,
     cc: Build,
+    cpu_clock: HertzU32,
+    heap_size: usize,
+    /// in words
+    minimal_stack_size: usize,
+    max_priorities: u8,
+    timer_task_config: Option<TimerTaskConfig>,
+    use_preemption: bool,
+    idle_should_yield: Option<bool>,
+    interrupt_priority_bits: Option<InterruptPriorityBits>,
+    interrupt_priority: Option<InterruptPriority>,
+    max_task_name_len: Option<usize>,
+    queue_registry_size: Option<usize>,
+    check_for_stack_overflow: Option<u8>,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct TimerTaskConfig {
+    priority: u8,
+    queue_length: usize,
+    stack_depth: usize,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct InterruptPriorityBits {
+    bits: u8,
+    lowest_priority: u32,
+    max_syscall_priority: u32,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct InterruptPriority {
+    lowest_priority: u32,
+    max_syscall_priority: u32,
 }
 
 #[derive(Debug)]
@@ -45,8 +83,30 @@ impl Default for Builder {
             freertos_port_base: None,
             cc: cc::Build::new(),
             heap_c: PathBuf::from("heap_4.c"),
+            cpu_clock: 0.Hz(),
+            heap_size: 16 * 1024,
+            minimal_stack_size: 80,
+            max_priorities: 5,
+            timer_task_config: None,
+            use_preemption: true,
+            idle_should_yield: None,
+            interrupt_priority_bits: None,
+            interrupt_priority: None,
+            max_task_name_len: None,
+            queue_registry_size: None,
+            check_for_stack_overflow: None,
         }
     }
+}
+
+macro_rules! set_define {
+    ($cc:ident, $def:expr, $v:expr) => {
+        $cc.define($def, $v.to_string().as_str());
+    };
+    (bool, $cc:ident, $def:expr, $v:expr) => {
+        let v = if $v { 1 } else { 0 };
+        $cc.define($def, v.to_string().as_str());
+    };
 }
 
 impl Builder {
@@ -128,6 +188,73 @@ impl Builder {
     /// Access to the underlining cc::Build instance to further customize the build.
     pub fn get_cc(&mut self) -> &mut Build {
         &mut self.cc
+    }
+
+    pub fn cpu_clock(&mut self, clock: HertzU32) {
+        self.cpu_clock = clock;
+    }
+
+    pub fn heap_size(&mut self, size: usize) {
+        self.heap_size = size;
+    }
+
+    /// in words
+    pub fn minimal_stack_size(&mut self, size: usize) {
+        self.minimal_stack_size = size;
+    }
+
+    pub fn max_task_priorities(&mut self, val: u8) {
+        self.max_priorities = val;
+    }
+
+    /// http://www.freertos.org/Configuring-a-real-time-RTOS-application-to-use-software-timers.html
+    pub fn use_timer_task(&mut self, priority: u8, queue_length: usize, stack_depth: usize) {
+        self.timer_task_config = Some(TimerTaskConfig {
+            priority,
+            queue_length,
+            stack_depth,
+        });
+    }
+
+    pub fn use_preemption(&mut self, v: bool) {
+        self.use_preemption = v;
+    }
+
+    pub fn idle_should_yield(&mut self, v: bool) {
+        self.idle_should_yield = Some(v);
+    }
+
+    /// http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html
+    pub fn interrupt_priority_bits(
+        &mut self,
+        bits: u8,
+        max_syscall_priority: u32,
+        lowest_priority: u32,
+    ) {
+        self.interrupt_priority_bits = Some(InterruptPriorityBits {
+            bits,
+            lowest_priority,
+            max_syscall_priority,
+        });
+    }
+
+    pub fn interrupt_priority(&mut self, max_syscall_priority: u32, lowest_priority: u32) {
+        self.interrupt_priority = Some(InterruptPriority {
+            lowest_priority,
+            max_syscall_priority,
+        });
+    }
+
+    pub fn max_task_name_len(&mut self, v: usize) {
+        self.max_task_name_len = Some(v);
+    }
+
+    pub fn queue_registry_size(&mut self, v: usize) {
+        self.queue_registry_size = Some(v);
+    }
+
+    pub fn check_for_stack_overflow(&mut self, v: u8) {
+        self.check_for_stack_overflow = Some(v)
     }
 
     fn freertos_include_dir(&self) -> PathBuf {
@@ -265,6 +392,7 @@ impl Builder {
         add_include_with_rerun(&mut cc, self.get_freertos_port_dir()); // FreeRTOS port header files (e.g. portmacro.h)
         add_include_with_rerun(&mut cc, &self.config_dir); // FreeRTOSConfig.h
         if let Some(dir) = &self.user_config_dir {
+            set_define!(cc, "__HAS_USER_CONFIG", 1);
             add_include_with_rerun(&mut cc, dir); // User's UserConfig.h
             println!("cargo:rerun-if-env-changed={}", dir.to_str().unwrap());
         }
@@ -274,6 +402,55 @@ impl Builder {
         add_build_file_with_rerun(&mut cc, &self.shim_file); // Shim C file
         add_build_file_with_rerun(&mut cc, self.heap_c_file()); // Heap C file
 
+        if self.cpu_clock.raw() > 0 {
+            set_define!(cc, "configCPU_CLOCK_HZ", self.cpu_clock.raw());
+        }
+        set_define!(cc, "configMINIMAL_STACK_SIZE", self.minimal_stack_size);
+        set_define!(cc, "configTOTAL_HEAP_SIZE", self.heap_size);
+        set_define!(cc, "configMAX_PRIORITIES", self.max_priorities);
+        if let Some(config) = &self.timer_task_config {
+            set_define!(cc, "configUSE_TIMERS", 1);
+            set_define!(cc, "configTIMER_TASK_PRIORITY", config.priority);
+            set_define!(cc, "configTIMER_QUEUE_LENGTH", config.queue_length);
+            set_define!(cc, "configTIMER_TASK_STACK_DEPTH", config.stack_depth);
+        }
+        set_define!(bool, cc, "configUSE_PREEMPTION", self.use_preemption);
+        if let Some(v) = self.idle_should_yield {
+            set_define!(bool, cc, "configIDLE_SHOULD_YIELD", v);
+        }
+        if let Some(config) = self.interrupt_priority_bits {
+            set_define!(
+                cc,
+                "configKERNEL_INTERRUPT_PRIORITY",
+                config.lowest_priority << (8 - config.bits)
+            );
+            set_define!(
+                cc,
+                "configMAX_SYSCALL_INTERRUPT_PRIORITY",
+                config.max_syscall_priority << (8 - config.bits)
+            );
+        }
+        if let Some(config) = self.interrupt_priority {
+            set_define!(
+                cc,
+                "configKERNEL_INTERRUPT_PRIORITY",
+                config.lowest_priority
+            );
+            set_define!(
+                cc,
+                "configMAX_SYSCALL_INTERRUPT_PRIORITY",
+                config.max_syscall_priority
+            );
+        }
+        if let Some(v) = self.max_task_name_len {
+            set_define!(cc, "configMAX_TASK_NAME_LEN", v);
+        }
+        if let Some(v) = self.queue_registry_size {
+            set_define!(cc, "configQUEUE_REGISTRY_SIZE", v);
+        }
+        if let Some(v) = self.check_for_stack_overflow {
+            set_define!(cc, "configCHECK_FOR_STACK_OVERFLOW", v);
+        }
         setup_all_define(&mut cc);
 
         println!(
@@ -360,7 +537,7 @@ fn setup_all_define(cc: &mut cc::Build) {
 fn sync_define(cc: &mut cc::Build, def: &str) {
     let v = "DEP_FREERTOS_DEF_".to_string() + &def.to_uppercase();
     let v_string = env::var(v).unwrap_or("0".to_string());
-    cc.define(def, v_string.as_str());
+    set_define!(cc, def, v_string);
 }
 
 #[test]
